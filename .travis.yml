@@ -16,10 +16,10 @@ before_install:
 before_script:
   - docker exec -it emscripten make wasm
 
-script:
-  - ls -la
-  - ls -la out
-  - whoami
+# script:
+#   - ls -la
+#   - ls -la out
+#   - whoami
 
 
 
