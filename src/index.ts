@@ -1,5 +1,3 @@
-let wasm = require('../out/btfb.js');
-
 function _waitForStart(mod): Promise<void> {
   return new Promise((resolve, reject)=>{
     mod.addOnPostRun(resolve);
@@ -8,13 +6,16 @@ function _waitForStart(mod): Promise<void> {
 
 
 class BehaviorTreeFlatBuffer {
+  wasm: any;
   constructor(public options = {}) {
     console.log('ctons');
+
+    this.wasm = require('../out/btfb.js');
   }
 
   async start(): Promise<void> {
     console.log('start');
-    await _waitForStart(wasm);
+    await _waitForStart(this.wasm);
 
 
     // mergeInto(wasm, {
@@ -35,15 +36,19 @@ class BehaviorTreeFlatBuffer {
 
   private bindCallback(): void {
 
+    const wasm = this.wasm;
+
     // example of grabbing byte array directly from wasm memory
     this.boundFnPtr = wasm.addFunction(function(ptr, sz) {
+
+
 
       console.log(`in js function ${ptr} ${sz}`);
 
       if( false ) {
         let v0;
         for(let i = 0; i < 5; i++) {
-          v0 = wasm.getValue(ptr+i, 'i8');
+          v0 = this.wasm.getValue(ptr+i, 'i8');
           console.log(v0);
         }
       }
@@ -64,20 +69,20 @@ class BehaviorTreeFlatBuffer {
   }
 
   testAnything(): number {
-    let int_sqrt = wasm.cwrap('int_sqrt', 'number', ['number'])
+    let int_sqrt = this.wasm.cwrap('int_sqrt', 'number', ['number'])
     // console.log(`${int_sqrt(12)} === 3`);
     const res = int_sqrt(12);
     return res;
   }
 
   debugExample(): void {
-    let int_sqrt = wasm.cwrap('debug_example', 'void', ['void'])
+    let int_sqrt = this.wasm.cwrap('debug_example', 'void', ['void'])
     // console.log(`${int_sqrt(12)} === 3`);
     int_sqrt();
   }
 
   callCallback(): void {
-    let fn = wasm.cwrap('callBoundJs', 'void', ['void']);
+    let fn = this.wasm.cwrap('callBoundJs', 'void', ['void']);
 
     fn();
   }
