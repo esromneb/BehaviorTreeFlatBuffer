@@ -8,6 +8,8 @@
 // #include "RayApi.hpp"
 // #include "JsApi.hpp"
 
+#include "other.hpp"
+
 
 #include <iostream>
 #include <vector>
@@ -30,32 +32,14 @@
 using namespace std;
 
 
+
+
+
 extern "C" {
 
-// void setupEngine(void) {
-//     engine = new RayEngine();
-//     engine->resize(400,400);
-
-//     setRayApiTarget(engine);
-
-//     // engine->makeObjects();
-//     // engine->render();
-
-//     // uint32_t x = 400;
-//     // uint32_t y = 400;
-//     // buffer.resize(x);
-//     // for(auto &row : buffer) {
-//     //     row.resize(y);
-//     // }
-
-//     // engine->makeObjects();
-
-//     // readWaveFront( *engine );
-
+// void ddebug_example(void) {
+//     debug_example();
 // }
-
-
-
 
 } // extern C
 
@@ -164,8 +148,12 @@ void somefn(void) {
 }
 
 int int_sqrt(int x) {
-  return sqrt(x);
+    return sqrt(x);
 }
+
+
+
+
 
 
 } // extern C

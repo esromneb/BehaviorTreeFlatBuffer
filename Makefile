@@ -9,11 +9,11 @@ all: test_png test_parse test_refl test_vec test_orbit wasm
 important: wasm test_png
 
 
+WASM_MAIN = csrc/main.cpp
 
 HPP_FILES = \
 csrc/other.hpp \
 
-WASM_MAIN = csrc/main.cpp
 
 CPP_FILES = \
 csrc/other.cpp \
@@ -44,9 +44,9 @@ lib/BehaviorTree.CPP/src/controls/while_do_else_node.cpp \
 lib/BehaviorTree.CPP/src/loggers/bt_cout_logger.cpp \
 lib/BehaviorTree.CPP/src/loggers/bt_file_logger.cpp \
 lib/BehaviorTree.CPP/src/private/tinyxml2.cpp \
+lib/BehaviorTree.CPP/src/xml_parsing.cpp \
 
 # lib/BehaviorTree.CPP/src/loggers/bt_minitrace_logger.cpp \
-# lib/BehaviorTree.CPP/src/xml_parsing.cpp \
 
 # WASM only cpp files
 WASM_CPP_FILES = \
@@ -58,6 +58,7 @@ WASM_CPP_FILES = \
 EXPORT_STRING = \
 "_somefn", \
 "_int_sqrt", \
+"_debug_example", \
 
 TEMPLATE_FILE = template/proxy_controls.html
 JS_TEMPLATE_FILE = template/pre.ray.js
@@ -81,6 +82,7 @@ CLANG_WARN_FLAGS = \
 
 CLANG_OTHER_FLAGS = \
 --include-directory=lib/BehaviorTree.CPP/include \
+--include-directory=lib/BehaviorTree.CPP/3rdparty \
 -DBT_NO_COROUTINES \
 
 

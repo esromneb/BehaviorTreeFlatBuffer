@@ -1,6 +1,6 @@
 let wasm = require('../out/ray.js');
 
-function waitForStart(mod): Promise<void> {
+function _waitForStart(mod): Promise<void> {
   return new Promise((resolve, reject)=>{
     mod.addOnPostRun(resolve);
   });
@@ -14,7 +14,7 @@ class BehaviorTreeFlatBuffer {
 
   async start(): Promise<void> {
     console.log('start');
-    await waitForStart(wasm);
+    await _waitForStart(wasm);
   }
 
   testAnything(): number {
@@ -22,6 +22,12 @@ class BehaviorTreeFlatBuffer {
     // console.log(`${int_sqrt(12)} === 3`);
     const res = int_sqrt(12);
     return res;
+  }
+
+  debugExample(): void {
+    let int_sqrt = wasm.cwrap('debug_example', 'void', ['void'])
+    // console.log(`${int_sqrt(12)} === 3`);
+    int_sqrt();
   }
 }
 

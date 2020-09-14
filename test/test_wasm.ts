@@ -55,6 +55,8 @@ test("test ts module", async function(done) {
   await dut.start();
 
   expect(dut.testAnything()).toBe(3);
+
+  dut.debugExample();
   
   done();
 });
