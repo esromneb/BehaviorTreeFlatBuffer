@@ -2,7 +2,7 @@
 .PHONY: wasm all important clean e
 
 
-wasm: out/ray.wasm
+wasm: out/btfb.wasm
 
 all: test_png test_parse test_refl test_vec test_orbit wasm
 
@@ -60,8 +60,8 @@ EXPORT_STRING = \
 "_int_sqrt", \
 "_debug_example", \
 
-TEMPLATE_FILE = template/proxy_controls.html
-JS_TEMPLATE_FILE = template/pre.ray.js
+# TEMPLATE_FILE = template/proxy_controls.html
+# JS_TEMPLATE_FILE = template/pre.ray.js
 
 ifdef EXTRACT_HTML_TEMPLATE
   TEMPLATE_FILE = template/extract_script_template.html
@@ -103,39 +103,13 @@ endif
 
 # don't need this until we get poly working
 #--preload-file 'root_fs'
-out/ray.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) $(WASM_CPP_FILES) Makefile
+out/btfb.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) $(WASM_CPP_FILES) Makefile
 	mkdir -p out
-	emcc $(WASM_MAIN) $(WASM_CPP_FILES) $(CPP_FILES) -s WASM=1 -o out/ray.html \
+	emcc $(WASM_MAIN) $(WASM_CPP_FILES) $(CPP_FILES) -s WASM=1 -o out/btfb.html \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s EXPORTED_FUNCTIONS='[$(EXPORT_STRING) "_main"]' \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun"]' \
 	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
-
-# this target doesn't actually exist
-.PHONY: out/empty
-
-e: out/empty
-
-out/empty:  $(TEMPLATE_FILE) $(JS_TEMPLATE_FILE) Makefile
-	emcc src/Empty.cpp -s WASM=1 -o out/ray.html \
-	--shell-file $(TEMPLATE_FILE) \
-	--proxy-to-worker \
-	-s ALLOW_MEMORY_GROWTH=1 \
-	--pre-js $(JS_TEMPLATE_FILE) \
-	-s EXPORTED_FUNCTIONS='["_main"]' \
-	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' \
-	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS)
-	$(MARK_WASM_DIRTY)
-
-
-# We want to get the global html that emscripten dumps in the script tag
-# see https://unix.stackexchange.com/questions/446410/reverse-file-character-by-character-using-tac
-# this head/tail version only work on the NOOPT output
-out/doubleRayBridge.js:
-	$(MARK_WASM_DIRTY) && NOOPT=1 EXTRACT_HTML_TEMPLATE=1 make e && $(MARK_WASM_DIRTY)
-	cat out/ray.html | tail -c+9 | head -c-11  > out/doubleRayBridge.js
-
-
 
 
 

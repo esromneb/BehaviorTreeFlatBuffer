@@ -1,4 +1,4 @@
-let wasm = require('../out/ray.js');
+let wasm = require('../out/btfb.js');
 
 function _waitForStart(mod): Promise<void> {
   return new Promise((resolve, reject)=>{
