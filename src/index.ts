@@ -1,10 +1,27 @@
+let wasm = require('../out/ray.js');
+
+function waitForStart(mod): Promise<void> {
+  return new Promise((resolve, reject)=>{
+    mod.addOnPostRun(resolve);
+  });
+}
+
+
 class BehaviorTreeFlatBuffer {
   constructor(public options = {}) {
     console.log('ctons');
   }
 
-  async start() {
+  async start(): Promise<void> {
     console.log('start');
+    await waitForStart(wasm);
+  }
+
+  testAnything(): number {
+    let int_sqrt = wasm.cwrap('int_sqrt', 'number', ['number'])
+    // console.log(`${int_sqrt(12)} === 3`);
+    const res = int_sqrt(12);
+    return res;
   }
 }
 
