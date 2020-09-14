@@ -43,3 +43,17 @@ test("test wasm full", async function(done) {
 
   // }, 100);
 });
+
+
+import {BehaviorTreeFlatBuffer} from '../src/index'
+
+
+
+test("test ts module", async function(done) {
+
+  const dut = new BehaviorTreeFlatBuffer();
+
+  dut.start();
+  
+  done();
+});
