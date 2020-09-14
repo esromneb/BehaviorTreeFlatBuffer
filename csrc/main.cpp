@@ -130,6 +130,7 @@ unsigned frames_p = 0;
 // }
 
 int main(int argc, char ** argv) {
+    cout << "Main run\n";
     (void)argc;
     (void)argv;
 
@@ -161,6 +162,11 @@ extern "C" {
 void somefn(void) {
     cout << "hi " << "somefn" << "\n";
 }
+
+int int_sqrt(int x) {
+  return sqrt(x);
+}
+
 
 } // extern C
 

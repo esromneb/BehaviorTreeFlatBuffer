@@ -27,6 +27,7 @@ WASM_CPP_FILES = \
 # all lines must have trailing comma
 EXPORT_STRING = \
 "_somefn", \
+"_int_sqrt", \
 
 TEMPLATE_FILE = template/proxy_controls.html
 JS_TEMPLATE_FILE = template/pre.ray.js
@@ -68,7 +69,7 @@ out/ray.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) $(WASM_CPP_FILES) Makefile
 	emcc $(WASM_MAIN) $(WASM_CPP_FILES) $(CPP_FILES) -s WASM=1 -o out/ray.html \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s EXPORTED_FUNCTIONS='[$(EXPORT_STRING) "_main"]' \
-	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' \
+	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun"]' \
 	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS)
 
 # this target doesn't actually exist
@@ -160,54 +161,67 @@ CPP_TEST_FILES =
 
 
 
-test_orbit2: src/test_orbit.cpp $(CPP_FILES) $(HPP_FILES) Makefile
-	g++ test_orbit.cpp $(CPP_FILES) -o $@
+# test_orbit2: src/test_orbit.cpp $(CPP_FILES) $(HPP_FILES) Makefile
+# 	g++ test_orbit.cpp $(CPP_FILES) -o $@
 
-test_parse2: src/test_parse.cpp $(CPP_FILES) $(HPP_FILES) Makefile
-	g++ $< $(CPP_FILES) -std=c++17  -g -o $@
-
-
-# $< name of first prerequisite
-# $@ name of target
-test_orbit: src/test_orbit.cpp $(CPP_FILES) $(HPP_FILES) Makefile
-	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
-
-test_vec: src/test_vec.cpp $(CPP_FILES) $(HPP_FILES) Makefile
-	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
+# test_parse2: src/test_parse.cpp $(CPP_FILES) $(HPP_FILES) Makefile
+# 	g++ $< $(CPP_FILES) -std=c++17  -g -o $@
 
 
-test_refl: src/test_refl.cpp $(CPP_FILES) $(HPP_FILES) Makefile
-	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
+# # $< name of first prerequisite
+# # $@ name of target
+# test_orbit: src/test_orbit.cpp $(CPP_FILES) $(HPP_FILES) Makefile
+# 	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
+
+# test_vec: src/test_vec.cpp $(CPP_FILES) $(HPP_FILES) Makefile
+# 	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
 
 
-test_parse: src/test_parse.cpp $(CPP_FILES) $(HPP_FILES) Makefile
-	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
-
-test_ang: src/test_ang.cpp $(CPP_FILES) $(HPP_FILES) Makefile
-	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
+# test_refl: src/test_refl.cpp $(CPP_FILES) $(HPP_FILES) Makefile
+# 	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
 
 
+# test_parse: src/test_parse.cpp $(CPP_FILES) $(HPP_FILES) Makefile
+# 	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
 
-test_png: src/test_png.cpp $(CPP_FILES) $(HPP_FILES) $(HPP_TEST_FILES) $(CPP_TEST_FILES) Makefile
-	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) $(CPP_TEST_FILES) -O3 -o $@
+# test_ang: src/test_ang.cpp $(CPP_FILES) $(HPP_FILES) Makefile
+# 	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) -g -o $@
 
 
+
+# test_png: src/test_png.cpp $(CPP_FILES) $(HPP_FILES) $(HPP_TEST_FILES) $(CPP_TEST_FILES) Makefile
+# 	clang++ $(CLANG_WARN_FLAGS) -std=c++2a $< $(CPP_FILES) $(CPP_TEST_FILES) -O3 -o $@
+
+.PHONY: all build watch dev start test pretest lint jestc
 .PHONY: test
 
-test: test_png
-	./test_png -a -g
+# test: test_png
+# 	./test_png -a -g
+
+build:
+	npm run build
+
+test: jestc
+	npm run test
+
+jestc:
+	npm run jestc
+
+# jest watch tests
+jestw:
+	npm run jestw
 
 
 .PHONY: rmtest movetestideal rmideal
 
-rmtest: 
-	rm -rf img/test/*.png
+# rmtest: 
+# 	rm -rf img/test/*.png
 
-rmideal: 
-	rm -rf img/ideal/*.png
+# rmideal: 
+# 	rm -rf img/ideal/*.png
 
-movetestideal: rmideal
-	mv img/test/*.png img/ideal/
+# movetestideal: rmideal
+# 	mv img/test/*.png img/ideal/
 
 
 clean:
@@ -215,23 +229,23 @@ clean:
 	rm -rf dist/*
 
 
-.PHONY: build_publish copy_to_dist
+# .PHONY: build_publish copy_to_dist
 
-copy_to_dist: dist/ray.wasm
+# copy_to_dist: dist/ray.wasm
 
-PUBLISH_COPY = \
-out/ray.wasm \
-out/ray.js \
-out/doubleRayInstantiate.js \
-out/doubleRayControls.js \
-out/doubleRayBridge.js
+# PUBLISH_COPY = \
+# out/ray.wasm \
+# out/ray.js \
+# out/doubleRayInstantiate.js \
+# out/doubleRayControls.js \
+# out/doubleRayBridge.js
 
 
-# copy everything we need over to dist
-dist/ray.wasm: out/ray.wasm out/ray.js
-	mkdir -p dist
-	cp $(PUBLISH_COPY) dist/
+# # copy everything we need over to dist
+# dist/ray.wasm: out/ray.wasm out/ray.js
+# 	mkdir -p dist
+# 	cp $(PUBLISH_COPY) dist/
 
-build_publish: copy out/doubleRayBridge.js dist/ray.wasm 
+# build_publish: copy out/doubleRayBridge.js dist/ray.wasm 
 
 
