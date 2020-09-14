@@ -85,6 +85,32 @@ void register_functions(BehaviorTreeFactory& factory) {
 #include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
 
+typedef void testExternalJSMethod(const unsigned char* const data, const size_t sz);
+
+
+static testExternalJSMethod* gptr = 0;
+
+extern "C" {
+
+void passFnPointer(int ptr) {
+    gptr = (testExternalJSMethod*)ptr;
+    // ((testExternalJSMethod*)ptr)();
+}
+
+
+void callBoundJs(void) {
+    unsigned char buf[8];
+    buf[0] = 'a';
+    buf[1] = 'b';
+    buf[2] = 'c';
+    buf[3] = '\0';
+    gptr(buf, 4);
+}
+
+} // extern
+
+
+
 void mywrite(const unsigned char* const data, const size_t sz) {
     for(size_t i = 0; i < sz; i++) {
         cout << (unsigned)data[i];
@@ -131,8 +157,6 @@ void debug_example(void) {
     // JSFlatLogger logger_file(tree, "bt_trace.fbl");
 
     my_dump(tree);
-
-
 }
 
 

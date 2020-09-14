@@ -59,6 +59,8 @@ EXPORT_STRING = \
 "_somefn", \
 "_int_sqrt", \
 "_debug_example", \
+"_passFnPointer", \
+"_callBoundJs", \
 
 # TEMPLATE_FILE = template/proxy_controls.html
 # JS_TEMPLATE_FILE = template/pre.ray.js
@@ -107,8 +109,9 @@ out/btfb.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) $(WASM_CPP_FILES) Makefile
 	mkdir -p out
 	emcc $(WASM_MAIN) $(WASM_CPP_FILES) $(CPP_FILES) -s WASM=1 -o out/btfb.html \
 	-s ALLOW_MEMORY_GROWTH=1 \
+	-s ALLOW_TABLE_GROWTH=1 \
 	-s EXPORTED_FUNCTIONS='[$(EXPORT_STRING) "_main"]' \
-	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun"]' \
+	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun", "addFunction", "HEAPU8", "setValue", "getValue"]' \
 	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
 
 

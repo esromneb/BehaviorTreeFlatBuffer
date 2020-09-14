@@ -48,7 +48,7 @@ test.skip("test wasm full", async function(done) {
 import {BehaviorTreeFlatBuffer} from '../src/index'
 
 
-test("test ts module", async function(done) {
+test.skip("test ts module", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
 
@@ -60,3 +60,19 @@ test("test ts module", async function(done) {
   
   done();
 });
+
+test("test call js fn from c", async function(done) {
+
+  const dut = new BehaviorTreeFlatBuffer();
+
+  await dut.start();
+
+  dut.callCallback();
+
+  // expect(dut.testAnything()).toBe(3);
+
+  // dut.debugExample();
+  
+  done();
+});
+
