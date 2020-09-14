@@ -17,6 +17,36 @@ WASM_MAIN = csrc/main.cpp
 
 CPP_FILES = \
 csrc/other.cpp \
+lib/BehaviorTree.CPP/src/action_node.cpp \
+lib/BehaviorTree.CPP/src/basic_types.cpp \
+lib/BehaviorTree.CPP/src/behavior_tree.cpp \
+lib/BehaviorTree.CPP/src/blackboard.cpp \
+lib/BehaviorTree.CPP/src/bt_factory.cpp \
+lib/BehaviorTree.CPP/src/decorator_node.cpp \
+lib/BehaviorTree.CPP/src/condition_node.cpp \
+lib/BehaviorTree.CPP/src/control_node.cpp \
+lib/BehaviorTree.CPP/src/shared_library.cpp \
+lib/BehaviorTree.CPP/src/tree_node.cpp \
+lib/BehaviorTree.CPP/src/decorators/inverter_node.cpp \
+lib/BehaviorTree.CPP/src/decorators/repeat_node.cpp \
+lib/BehaviorTree.CPP/src/decorators/retry_node.cpp \
+lib/BehaviorTree.CPP/src/decorators/subtree_node.cpp \
+lib/BehaviorTree.CPP/src/decorators/delay_node.cpp \
+lib/BehaviorTree.CPP/src/controls/if_then_else_node.cpp \
+lib/BehaviorTree.CPP/src/controls/fallback_node.cpp \
+lib/BehaviorTree.CPP/src/controls/parallel_node.cpp \
+lib/BehaviorTree.CPP/src/controls/reactive_sequence.cpp \
+lib/BehaviorTree.CPP/src/controls/reactive_fallback.cpp \
+lib/BehaviorTree.CPP/src/controls/sequence_node.cpp \
+lib/BehaviorTree.CPP/src/controls/sequence_star_node.cpp \
+lib/BehaviorTree.CPP/src/controls/switch_node.cpp \
+lib/BehaviorTree.CPP/src/controls/while_do_else_node.cpp \
+lib/BehaviorTree.CPP/src/loggers/bt_cout_logger.cpp \
+lib/BehaviorTree.CPP/src/loggers/bt_file_logger.cpp \
+lib/BehaviorTree.CPP/src/private/tinyxml2.cpp \
+
+# lib/BehaviorTree.CPP/src/loggers/bt_minitrace_logger.cpp \
+# lib/BehaviorTree.CPP/src/xml_parsing.cpp \
 
 # WASM only cpp files
 WASM_CPP_FILES = \
@@ -48,6 +78,13 @@ CLANG_WARN_FLAGS = \
 # -Wconversion
 # -Wshadow
 
+
+CLANG_OTHER_FLAGS = \
+--include-directory=lib/BehaviorTree.CPP/include \
+-DBT_NO_COROUTINES \
+
+
+
 CLANG_O_FLAG = '-O3'
 
 ifdef NOOPT
@@ -70,7 +107,7 @@ out/ray.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) $(WASM_CPP_FILES) Makefile
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s EXPORTED_FUNCTIONS='[$(EXPORT_STRING) "_main"]' \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun"]' \
-	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS)
+	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
 
 # this target doesn't actually exist
 .PHONY: out/empty
