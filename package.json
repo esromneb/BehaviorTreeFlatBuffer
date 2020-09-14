@@ -7,11 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "jest --no-cache --coverage",
+    "test": "jest --no-cache",
     "jestw": "jest --watch --runInBand --detectOpenHandles",
-    "build": "NODE_ENV=development webpack-cli --mode='development'",
-    "jestc": "jest --clearCache",
-    "pretest": "npm run build"
+    "jestc": "jest --clearCache"
   },
   "repository": {
     "type": "git",
