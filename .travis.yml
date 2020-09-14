@@ -17,8 +17,9 @@ before_script:
   - docker exec -it emscripten make wasm
 
 script:
-  - ls
-  - ls out
+  - ls -la
+  - ls -la out
+  - whoami
 
 
 
