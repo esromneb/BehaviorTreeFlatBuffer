@@ -93,12 +93,15 @@ std::vector<std::string> node_names;
 std::vector<uint32_t> node_ids;
 
 void save_node_ids(const Tree &tree) {
-    size_t i = 0;
+    // size_t i = 0;
+
+    node_names.resize(0);
+    node_ids.resize(0);
     for( const auto& n : tree.nodes ) {
 //         cout << n->registrationName() << "->" << n->UID() << "\n";
-        node_names[i] = n->registrationName();
-        node_ids[i] = n->UID();
-        i++;
+        node_names.push_back(n->registrationName());
+        node_ids.push_back(n->UID());
+        // i++;
     }
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "BehaviorTreeFlatBuffer",
   "version": "0.1.0",
-  "description": "Wrapper around BehaviorTree.CPP for the purpose of writing FlatBuffers",
+  "description": "Wrapper around BehaviorTree.CPP (in WASM) for the purpose of writing FlatBuffers",
   "main": "index.js",
   "directories": {
     "doc": "docs"

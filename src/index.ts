@@ -73,13 +73,16 @@ class BehaviorTreeFlatBuffer {
 
   c: {[name: string]: Function} = {};
 
-  bindCWrap(): number {
+  bindCWrap(): void {
     const wasm = this.wasm;
     const c = this.c;
 
-    c.int_sqrt      = wasm.cwrap('int_sqrt', 'number', ['number']);
-    c.debug_example = wasm.cwrap('debug_example', 'void', ['void'])
-    c.callBoundJs   = wasm.cwrap('callBoundJs', 'void', ['void']);
+    c.int_sqrt              = wasm.cwrap('int_sqrt', 'number', ['number']);
+    c.debug_example         = wasm.cwrap('debug_example', 'void', ['void'])
+    c.callBoundJs           = wasm.cwrap('callBoundJs', 'void', ['void']);
+    c.get_saved_node_count  = wasm.cwrap('get_saved_node_count', 'number', ['void']);
+    c.get_saved_node_name   = wasm.cwrap('get_saved_node_name', 'string', ['number']);
+    c.get_saved_node_id     = wasm.cwrap('get_saved_node_id', 'number', ['number']);
 
 
   }
@@ -101,6 +104,23 @@ class BehaviorTreeFlatBuffer {
 
     // fn();
     this.c.callBoundJs();
+  }
+
+  treeNodeIds: any = {};
+
+  extractNodeIds(): void {
+    const c = this.c;
+    const count = c.get_saved_node_count();
+
+    for(let i = 0; i < count; i++) {
+      const name = c.get_saved_node_name(i);
+      const id = c.get_saved_node_id(i);
+      this.treeNodeIds[name] = id;
+    }
+
+    console.log(this.treeNodeIds);
+
+    // console.log(`Got ${count} xml nodes`);
   }
 }
 

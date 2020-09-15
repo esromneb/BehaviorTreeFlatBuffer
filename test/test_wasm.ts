@@ -48,7 +48,7 @@ test.skip("test wasm full", async function(done) {
 import {BehaviorTreeFlatBuffer} from '../src/index'
 
 
-test.skip("test ts module", async function(done) {
+test("test cooked xml", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
 
@@ -57,6 +57,8 @@ test.skip("test ts module", async function(done) {
   expect(dut.testAnything()).toBe(3);
 
   dut.debugExample();
+
+  dut.extractNodeIds();
   
   done();
 });
@@ -65,7 +67,7 @@ test.skip("test ts module", async function(done) {
 
 
 
-test("test call js fn from c", async function(done) {
+test.skip("test call js fn from c", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
 
