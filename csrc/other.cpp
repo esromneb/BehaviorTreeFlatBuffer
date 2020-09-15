@@ -351,8 +351,8 @@ void debug_example(void) {
     cout << "-------- createTreeFromText --------\n";
 
     // Important: when the object tree goes out of scope, all the TreeNodes are destroyed
-    // auto tree = factory.createTreeFromText(xml_text);
-    auto tree = factory.createTreeFromText(xml_text2);
+    auto tree = factory.createTreeFromText(xml_text);
+    // auto tree = factory.createTreeFromText(xml_text2);
 
     dump_tree_nodes(tree);
     save_node_ids(tree);

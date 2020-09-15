@@ -111,6 +111,22 @@ test.skip("write file with ascii", async function(done) {
 
 
 
+
+function inject(dut, id, p: string, n: string): void {
+  const t = {
+    idle: 0,
+    running: 1,
+    success: 2,
+    failure: 3
+  };
+
+
+  dut.logTransition(id, t[p], t[n]);
+
+
+}
+
+
 test("write baked xml to file via c", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
@@ -125,8 +141,67 @@ test("write baked xml to file via c", async function(done) {
 
   dut.extractNodeIds();
 
-  dut.logTransition(1, 0, 1);
-  dut.logTransition(6, 1, 1);
+
+// ID: 1 idle - running
+// ID: 2 idle - running
+// ID: 3 idle - running
+// ID: 4 idle - failure
+// ID: 4 failure - idle
+// ID: 3 running - failure
+// ID: 6 idle - running
+
+  if( false ) {
+    dut.logTransition(1, 0, 1);
+    dut.logTransition(2, 0, 1);
+    dut.logTransition(3, 0, 1);
+    dut.logTransition(4, 0, 2);
+    dut.logTransition(4, 2, 0);
+  }
+
+  inject(dut, 1, 'idle', 'running');
+inject(dut, 2, 'idle', 'running');
+inject(dut, 3, 'idle', 'running');
+inject(dut, 4, 'idle', 'failure');
+inject(dut, 4, 'failure', 'idle');
+inject(dut, 3, 'running', 'failure');
+inject(dut, 6, 'idle', 'running');
+inject(dut, 7, 'idle', 'running');
+inject(dut, 8, 'idle', 'running');
+inject(dut, 9, 'idle', 'failure');
+inject(dut, 8, 'running', 'success');
+inject(dut, 9, 'failure', 'idle');
+inject(dut, 10, 'idle', 'running');
+inject(dut, 11, 'idle', 'running');
+inject(dut, 11, 'running', 'failure');
+inject(dut, 11, 'failure', 'idle');
+inject(dut, 11, 'idle', 'running');
+inject(dut, 11, 'running', 'failure');
+inject(dut, 11, 'failure', 'idle');
+inject(dut, 11, 'idle', 'running');
+inject(dut, 11, 'running', 'failure');
+inject(dut, 11, 'failure', 'idle');
+inject(dut, 11, 'idle', 'running');
+inject(dut, 11, 'running', 'failure');
+inject(dut, 11, 'failure', 'idle');
+inject(dut, 10, 'running', 'failure');
+inject(dut, 8, 'success', 'idle');
+inject(dut, 10, 'failure', 'idle');
+inject(dut, 7, 'running', 'failure');
+inject(dut, 6, 'running', 'failure');
+inject(dut, 7, 'failure', 'idle');
+inject(dut, 13, 'idle', 'running');
+inject(dut, 13, 'running', 'success');
+inject(dut, 3, 'failure', 'idle');
+inject(dut, 6, 'failure', 'idle');
+inject(dut, 13, 'success', 'idle');
+inject(dut, 2, 'running', 'success');
+inject(dut, 14, 'idle', 'running');
+inject(dut, 14, 'running', 'success');
+inject(dut, 2, 'success', 'idle');
+inject(dut, 14, 'success', 'idle');
+inject(dut, 1, 'running', 'success');
+inject(dut, 1, 'success', 'idle');
+
 
   // dut.callCallback();
 
