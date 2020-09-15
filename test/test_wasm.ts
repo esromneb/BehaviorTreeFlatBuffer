@@ -1,4 +1,4 @@
-var fs = require('fs');
+
 
 
 function waitForStart(mod): Promise<void> {
@@ -48,7 +48,7 @@ test.skip("test wasm full", async function(done) {
 import {BehaviorTreeFlatBuffer} from '../src/index'
 
 
-test("test cooked xml", async function(done) {
+test.skip("test cooked xml", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
 
@@ -78,6 +78,31 @@ test.skip("test call js fn from c", async function(done) {
   // expect(dut.testAnything()).toBe(3);
 
   // dut.debugExample();
+  
+  done();
+});
+
+
+
+test("write file with ascii", async function(done) {
+
+  const dut = new BehaviorTreeFlatBuffer();
+
+  await dut.start();
+
+  await dut.setFilePath('./node.fbl');
+
+  let b0 = new Buffer('a');
+  let b1 = new Buffer('b');
+
+
+  await dut._write(b0);
+  await dut._write(b1);
+  // expect(dut.testAnything()).toBe(3);
+
+  // dut.debugExample();
+
+  // dut.extractNodeIds();
   
   done();
 });

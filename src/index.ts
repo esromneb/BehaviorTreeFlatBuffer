@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 function _waitForStart(mod): Promise<void> {
   return new Promise((resolve, reject)=>{
     mod.addOnPostRun(resolve);
@@ -18,21 +20,60 @@ class BehaviorTreeFlatBuffer {
     await _waitForStart(this.wasm);
 
 
-    // mergeInto(wasm, {
-    //   read_u8s: function(myStructPointer, size) {
-    //     // Assumes the struct starts on a 4-byte boundary
-    //     // var myNumber = HEAPU32[myStructPointer/4];
-    //     // console.log(myNumber);
-    //     // Assumes my_char_array is immediately after my_number with no padding
-    //     var myCharArray = HEAPU8.subarray(myStructPointer, size);
-    //     console.log(myCharArray);
-    //   }
-    // });
-
     this.bindCWrap();
-
     this.bindCallback();
   }
+
+  filePath: string|undefined = undefined;
+  fd: number|undefined = undefined;
+
+  setFilePath(path: string): Promise<void> {
+
+    const that = this;
+
+    return new Promise((resolve, reject)=>{
+      fs.open(path, 'w', function(err, fd) {
+          if (err) {
+            reject(err);
+              // throw 'could not open file: ' + err;
+              return;
+          }
+          that.fd = fd;
+          resolve();
+      });
+    });
+
+    
+
+  }
+
+
+  _write(buffer: any): Promise<void> {
+
+    const that = this;
+
+    return new Promise((resolve, reject)=>{
+      
+        fs.write(that.fd, buffer, 0, buffer.length, null, function(err) {
+          if (err) {
+            reject(err);
+              // throw 'could not open file: ' + err;
+              return;
+          }
+          resolve();
+            // if (err) throw 'error writing file: ' + err;
+            // fs.close(fd, function() {
+            //     console.log('wrote the file successfully');
+            // });
+        });
+    });
+    // write the contents of the buffer, from position 0 to the end, to the file descriptor returned in opening our file
+  }
+
+
+
+
+
 
   boundFnPtr: number;
 
@@ -111,8 +152,8 @@ class BehaviorTreeFlatBuffer {
 
   treeNodeIds: any = {};
   // seems like node ids start at 1 not 0
-  // this allows it to be undefined
-  children: any = [undefined];
+  // this allows it to be similar to others
+  children: any = [[]];
   // tree: any = {};
 
   extractNodeIds(): void {
