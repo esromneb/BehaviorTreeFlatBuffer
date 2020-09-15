@@ -29,6 +29,8 @@ class BehaviorTreeFlatBuffer {
     //   }
     // });
 
+    this.bindCWrap();
+
     this.bindCallback();
   }
 
@@ -68,23 +70,37 @@ class BehaviorTreeFlatBuffer {
 
   }
 
+
+  c: {[name: string]: Function} = {};
+
+  bindCWrap(): number {
+    const wasm = this.wasm;
+    const c = this.c;
+
+    c.int_sqrt      = wasm.cwrap('int_sqrt', 'number', ['number']);
+    c.debug_example = wasm.cwrap('debug_example', 'void', ['void'])
+    c.callBoundJs   = wasm.cwrap('callBoundJs', 'void', ['void']);
+
+
+  }
+
   testAnything(): number {
-    let int_sqrt = this.wasm.cwrap('int_sqrt', 'number', ['number'])
     // console.log(`${int_sqrt(12)} === 3`);
-    const res = int_sqrt(12);
+    const res = this.c.int_sqrt(12);
     return res;
   }
 
   debugExample(): void {
-    let int_sqrt = this.wasm.cwrap('debug_example', 'void', ['void'])
+    // let int_sqrt = this.wasm.cwrap('debug_example', 'void', ['void'])
     // console.log(`${int_sqrt(12)} === 3`);
-    int_sqrt();
+    this.c.debug_example();
   }
 
   callCallback(): void {
-    let fn = this.wasm.cwrap('callBoundJs', 'void', ['void']);
+    // let fn = this.wasm.cwrap('callBoundJs', 'void', ['void']);
 
-    fn();
+    // fn();
+    this.c.callBoundJs();
   }
 }
 

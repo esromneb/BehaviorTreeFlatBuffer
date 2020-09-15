@@ -61,6 +61,9 @@ EXPORT_STRING = \
 "_debug_example", \
 "_passFnPointer", \
 "_callBoundJs", \
+"_get_saved_node_count", \
+"_get_saved_node_name", \
+"_get_saved_node_id", \
 
 # TEMPLATE_FILE = template/proxy_controls.html
 # JS_TEMPLATE_FILE = template/pre.ray.js

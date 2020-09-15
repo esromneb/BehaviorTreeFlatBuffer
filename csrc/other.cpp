@@ -88,7 +88,40 @@ void register_functions(BehaviorTreeFactory& factory) {
 //     }
 // }
 
-void dump_tree_nodes(Tree &tree) {
+
+std::vector<std::string> node_names;
+std::vector<uint32_t> node_ids;
+
+void save_node_ids(const Tree &tree) {
+    size_t i = 0;
+    for( const auto& n : tree.nodes ) {
+//         cout << n->registrationName() << "->" << n->UID() << "\n";
+        node_names[i] = n->registrationName();
+        node_ids[i] = n->UID();
+        i++;
+    }
+}
+
+extern "C" {
+
+uint32_t get_saved_node_count(void) {
+    return (uint32_t)node_ids.size();
+}
+
+const char* get_saved_node_name(const uint32_t i) {
+    return node_names[i].c_str();
+}
+
+uint32_t get_saved_node_id(const uint32_t i) {
+    return node_ids[i];
+}
+
+
+
+}
+
+
+void dump_tree_nodes(const Tree &tree) {
     for( const auto& n : tree.nodes ) {
         cout << n->registrationName() << "->" << n->UID() << "\n";
     }
@@ -97,7 +130,7 @@ void dump_tree_nodes(Tree &tree) {
 #include <fstream>
 #include <deque>
 #include <array>
-#include <cstdint>
+
 #include "behaviortree_cpp_v3/loggers/abstract_logger.h"
 #include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
@@ -178,6 +211,7 @@ void debug_example(void) {
     auto tree = factory.createTreeFromText(xml_text);
 
     dump_tree_nodes(tree);
+    save_node_ids(tree);
 
     // JSFlatLogger logger_file(tree, "bt_trace.fbl");
 
