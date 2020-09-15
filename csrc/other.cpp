@@ -77,6 +77,23 @@ void register_functions(BehaviorTreeFactory& factory) {
     factory.registerSimpleAction("UnlockDoor", std::bind(DummyFunction));
 }
 
+
+// dumps xml nodes before they have an id
+// void dump_nodes(BehaviorTreeFactory& factory) {
+//     auto map = factory.manifests();
+
+//     for (auto i : map) {
+//         std::cout << i.first << "   " << i.second.registration_ID  
+//              << std::endl; 
+//     }
+// }
+
+void dump_tree_nodes(Tree &tree) {
+    for( const auto& n : tree.nodes ) {
+        cout << n->registrationName() << "->" << n->UID() << "\n";
+    }
+}
+
 #include <fstream>
 #include <deque>
 #include <array>
@@ -149,10 +166,18 @@ void debug_example(void) {
 
     BT::BehaviorTreeFactory factory;
 
+    cout << "-------- register --------\n";
+
     register_functions(factory);
+
+    // dump_nodes(factory);
+
+    cout << "-------- createTreeFromText --------\n";
 
     // Important: when the object tree goes out of scope, all the TreeNodes are destroyed
     auto tree = factory.createTreeFromText(xml_text);
+
+    dump_tree_nodes(tree);
 
     // JSFlatLogger logger_file(tree, "bt_trace.fbl");
 
