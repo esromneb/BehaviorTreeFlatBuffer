@@ -9,6 +9,9 @@ function _waitForStart(mod): Promise<void> {
 
 class BehaviorTreeFlatBuffer {
   wasm: any;
+
+  logWrites: boolean = false;
+
   constructor(public options = {}) {
     console.log('ctons');
 
@@ -21,7 +24,6 @@ class BehaviorTreeFlatBuffer {
 
 
     this.bindCWrap();
-    this.bindCallback();
   }
 
   filePath: string|undefined = undefined;
@@ -77,7 +79,7 @@ class BehaviorTreeFlatBuffer {
 
   boundFnPtr: number;
 
-  private bindCallback(): void {
+  bindCallback(): void {
 
     const wasm = this.wasm;
 
@@ -112,6 +114,55 @@ class BehaviorTreeFlatBuffer {
   }
 
 
+
+  bindCallback2(): void {
+
+    const wasm = this.wasm;
+    const that = this;
+
+    // example of grabbing byte array directly from wasm memory
+    this.boundFnPtr = wasm.addFunction(function(ptr, sz) {
+
+
+    if(that.logWrites) {
+      console.log(`in js function2 ${ptr} ${sz}`);
+    }
+
+      var myCharArray = wasm.HEAPU8.subarray(ptr, ptr+sz);
+
+      if( that.fd == undefined ) {
+        console.log("Error: bindCallback2 requires fd to be set ");
+        return;
+      }
+
+      that._write(myCharArray);
+      
+      if(that.logWrites) {
+        console.log(myCharArray);
+      }
+      // console.log(wasm.HEAPU8);
+
+    }, 'vii');
+
+
+    let passFn = wasm.cwrap('passFnPointer', 'void', ['number']);
+
+    passFn(this.boundFnPtr);
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
   c: {[name: string]: Function} = {};
 
   bindCWrap(): void {
@@ -126,9 +177,14 @@ class BehaviorTreeFlatBuffer {
     c.get_saved_node_id     = wasm.cwrap('get_saved_node_id',     'number', ['number']);
     c.get_child_node_count  = wasm.cwrap('get_child_node_count',  'number', ['number']);
     c.get_child_node_id     = wasm.cwrap('get_child_node_id',     'number', ['number','number']);
+    c.logTransition         = wasm.cwrap('logTransition',         'void', ['number','number','number']);
 // uint32_t get_child_node_count(const uint32_t i) {
 // uint32_t get_child_node_id(const uint32_t i, const uint32_t j) {
 
+  }
+
+  logTransition(uid: number, prev_status: number, status: number): void {
+    this.c.logTransition(uid, prev_status, status);
   }
 
   testAnything(): number {

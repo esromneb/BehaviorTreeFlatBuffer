@@ -9,6 +9,8 @@
 #include "behaviortree_cpp_v3/loggers/bt_minitrace_logger.h"
 #include "behaviortree_cpp_v3/loggers/bt_file_logger.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
+#include "behaviortree_cpp_v3/basic_types.h"
+
 
 
 
@@ -275,11 +277,21 @@ void callBoundJs(void) {
 
 
 
-void mywrite(const unsigned char* const data, const size_t sz) {
+void myPrintWrite(const unsigned char* const data, const size_t sz) {
     for(size_t i = 0; i < sz; i++) {
         cout << (unsigned)data[i];
     }
     cout << "\n";
+}
+
+void writeToJs(const unsigned char* const data, const size_t sz) {
+    if( gptr == 0 ) {
+        cout << "writeToJs() called when gptr was null, dropping these bytes:\n";
+        myPrintWrite(data, sz);
+        return;
+    }
+
+    gptr(data, sz);
 }
 
 
@@ -298,17 +310,34 @@ void my_dump(const Tree &tree) {
     unsigned char size_buff[4];
     flatbuffers::WriteScalar(size_buff, static_cast<int32_t>(builder.GetSize()));
 
-    mywrite(size_buff, 4);
-    mywrite(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), builder.GetSize());
+    // myPrintWrite(size_buff, 4);
+    // myPrintWrite(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), builder.GetSize());
+
+    writeToJs(size_buff, 4);
+    writeToJs(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), builder.GetSize());
 
     // file_os_.write(size_buff, 4);
     // file_os_.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
 }
 
+std::chrono::steady_clock::time_point parse_time;
+
 
 extern "C" {
 
+
+void logTransition(const int uid, const int prev_status, const int status) {
+    const auto now = std::chrono::high_resolution_clock::now();
+    const auto duration = now-parse_time;
+
+    SerializedTransition buffer =
+        SerializeTransition(uid, duration, (NodeStatus)prev_status, (NodeStatus)status);
+    
+    writeToJs(reinterpret_cast<const unsigned char*>(buffer.data()), buffer.size());
+}
+
 void debug_example(void) {
+    parse_time = std::chrono::steady_clock::now();
     cout << "debug_example()\n";
 
     BT::BehaviorTreeFactory factory;

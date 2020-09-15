@@ -73,6 +73,8 @@ test.skip("test call js fn from c", async function(done) {
 
   await dut.start();
 
+  dut.bindCallback();
+
   dut.callCallback();
 
   // expect(dut.testAnything()).toBe(3);
@@ -84,7 +86,7 @@ test.skip("test call js fn from c", async function(done) {
 
 
 
-test("write file with ascii", async function(done) {
+test.skip("write file with ascii", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
 
@@ -107,3 +109,30 @@ test("write file with ascii", async function(done) {
   done();
 });
 
+
+
+test("write baked xml to file via c", async function(done) {
+
+  const dut = new BehaviorTreeFlatBuffer();
+
+  await dut.start();
+
+  await dut.setFilePath('./node.fbl');
+
+  dut.bindCallback2();
+
+  dut.debugExample();
+
+  dut.extractNodeIds();
+
+  dut.logTransition(1, 0, 1);
+  dut.logTransition(6, 1, 1);
+
+  // dut.callCallback();
+
+  // expect(dut.testAnything()).toBe(3);
+
+  // dut.debugExample();
+  
+  done();
+});
