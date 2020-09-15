@@ -64,6 +64,8 @@ EXPORT_STRING = \
 "_get_saved_node_count", \
 "_get_saved_node_name", \
 "_get_saved_node_id", \
+"_get_child_node_count", \
+"_get_child_node_id", \
 
 # TEMPLATE_FILE = template/proxy_controls.html
 # JS_TEMPLATE_FILE = template/pre.ray.js

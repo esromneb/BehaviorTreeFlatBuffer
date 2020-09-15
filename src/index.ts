@@ -77,13 +77,16 @@ class BehaviorTreeFlatBuffer {
     const wasm = this.wasm;
     const c = this.c;
 
-    c.int_sqrt              = wasm.cwrap('int_sqrt', 'number', ['number']);
-    c.debug_example         = wasm.cwrap('debug_example', 'void', ['void'])
-    c.callBoundJs           = wasm.cwrap('callBoundJs', 'void', ['void']);
-    c.get_saved_node_count  = wasm.cwrap('get_saved_node_count', 'number', ['void']);
-    c.get_saved_node_name   = wasm.cwrap('get_saved_node_name', 'string', ['number']);
-    c.get_saved_node_id     = wasm.cwrap('get_saved_node_id', 'number', ['number']);
-
+    c.int_sqrt              = wasm.cwrap('int_sqrt',              'number', ['number']);
+    c.debug_example         = wasm.cwrap('debug_example',         'void', ['void'])
+    c.callBoundJs           = wasm.cwrap('callBoundJs',           'void', ['void']);
+    c.get_saved_node_count  = wasm.cwrap('get_saved_node_count',  'number', ['void']);
+    c.get_saved_node_name   = wasm.cwrap('get_saved_node_name',   'string', ['number']);
+    c.get_saved_node_id     = wasm.cwrap('get_saved_node_id',     'number', ['number']);
+    c.get_child_node_count  = wasm.cwrap('get_child_node_count',  'number', ['number']);
+    c.get_child_node_id     = wasm.cwrap('get_child_node_id',     'number', ['number','number']);
+// uint32_t get_child_node_count(const uint32_t i) {
+// uint32_t get_child_node_id(const uint32_t i, const uint32_t j) {
 
   }
 
@@ -107,6 +110,10 @@ class BehaviorTreeFlatBuffer {
   }
 
   treeNodeIds: any = {};
+  // seems like node ids start at 1 not 0
+  // this allows it to be undefined
+  children: any = [undefined];
+  // tree: any = {};
 
   extractNodeIds(): void {
     const c = this.c;
@@ -115,13 +122,35 @@ class BehaviorTreeFlatBuffer {
     for(let i = 0; i < count; i++) {
       const name = c.get_saved_node_name(i);
       const id = c.get_saved_node_id(i);
-      this.treeNodeIds[name] = id;
+      this.treeNodeIds[id] = name;
+      // console.log(`${name} -> ${id}`);
+
+
+      this.children[id] = this.extractChildrenIds(id);
+
     }
 
     console.log(this.treeNodeIds);
+    console.log(this.children);
 
     // console.log(`Got ${count} xml nodes`);
   }
+
+
+
+  extractChildrenIds(id: number): number[] {
+    const c = this.c;
+    let ret = [];
+    const count = c.get_child_node_count(id);
+
+    for(let i = 0; i < count; i++) {
+      const a_child_id = c.get_child_node_id(id, i);
+      ret.push(a_child_id);
+    }
+
+    return ret;
+  }
+
 }
 
 
