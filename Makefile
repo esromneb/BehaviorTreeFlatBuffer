@@ -59,14 +59,18 @@ EXPORT_STRING = \
 "_somefn", \
 "_int_sqrt", \
 "_debug_example", \
-"_passFnPointer", \
+"_pass_write_fn", \
 "_callBoundJs", \
 "_get_saved_node_count", \
 "_get_saved_node_name", \
 "_get_saved_node_id", \
 "_get_child_node_count", \
 "_get_child_node_id", \
-"_logTransition", \
+"_register_action_node", \
+"_register_condition_node", \
+"_unregister_builder", \
+"_parse_xml", \
+"_lt", \
 
 # TEMPLATE_FILE = template/proxy_controls.html
 # JS_TEMPLATE_FILE = template/pre.ray.js

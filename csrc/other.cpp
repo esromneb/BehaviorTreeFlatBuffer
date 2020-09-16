@@ -258,7 +258,7 @@ static testExternalJSMethod* gptr = 0;
 
 extern "C" {
 
-void passFnPointer(int ptr) {
+void pass_write_fn(int ptr) {
     gptr = (testExternalJSMethod*)ptr;
     // ((testExternalJSMethod*)ptr)();
 }
@@ -296,7 +296,7 @@ void writeToJs(const unsigned char* const data, const size_t sz) {
 
 
 
-void my_dump(const Tree &tree) {
+void write_tree_header_to_js(const Tree &tree) {
     // enableTransitionToIdle(true);
 
     flatbuffers::FlatBufferBuilder builder(1024);
@@ -326,7 +326,7 @@ std::chrono::steady_clock::time_point parse_time;
 extern "C" {
 
 
-void logTransition(const int uid, const int prev_status, const int status) {
+void lt(const int uid, const int prev_status, const int status) {
     const auto now = std::chrono::high_resolution_clock::now();
     const auto duration = now-parse_time;
 
@@ -336,11 +336,13 @@ void logTransition(const int uid, const int prev_status, const int status) {
     writeToJs(reinterpret_cast<const unsigned char*>(buffer.data()), buffer.size());
 }
 
+BT::BehaviorTreeFactory factory;
+
 void debug_example(void) {
     parse_time = std::chrono::steady_clock::now();
     cout << "debug_example()\n";
 
-    BT::BehaviorTreeFactory factory;
+    
 
     cout << "-------- register --------\n";
 
@@ -359,8 +361,34 @@ void debug_example(void) {
 
     // JSFlatLogger logger_file(tree, "bt_trace.fbl");
 
-    my_dump(tree);
+    write_tree_header_to_js(tree);
 }
 
+// pass an action or condition node name
+void unregister_builder(const char* name) {
+    factory.unregisterBuilder(name);
+
+}
+
+void register_action_node(const char* name) {
+    factory.registerSimpleAction(name, std::bind(DummyFunction));
+}
+
+void register_condition_node(const char* name) {
+    factory.registerSimpleCondition(name, std::bind(DummyFunction));
+}
+
+void parse_xml(const char* xml) {
+    parse_time = std::chrono::steady_clock::now();
+
+    // parse BehaviorTree
+    auto tree = factory.createTreeFromText(xml);
+
+    // pull out the node IDS into the vectors in this file
+    save_node_ids(tree);
+
+    // write to the js callback with byte data for the log header
+    write_tree_header_to_js(tree);
+}
 
 }

@@ -1,4 +1,4 @@
-
+const t05 = require("./btrees/t05.xml");
 
 
 function waitForStart(mod): Promise<void> {
@@ -6,6 +6,12 @@ function waitForStart(mod): Promise<void> {
     mod.addOnPostRun(resolve);
   });
 }
+
+async function _sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 
 
 // this breaks the dut tests below
@@ -110,8 +116,6 @@ test.skip("write file with ascii", async function(done) {
 });
 
 
-
-
 function inject(dut, id, p: string, n: string): void {
   const t = {
     idle: 0,
@@ -127,7 +131,7 @@ function inject(dut, id, p: string, n: string): void {
 }
 
 
-test("write baked xml to file via c", async function(done) {
+test.skip("write baked xml to file via c", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
 
@@ -135,7 +139,7 @@ test("write baked xml to file via c", async function(done) {
 
   await dut.setFilePath('./node.fbl');
 
-  dut.bindCallback2();
+  // dut.bindCallback2();
 
   dut.debugExample();
 
@@ -209,5 +213,58 @@ inject(dut, 1, 'success', 'idle');
 
   // dut.debugExample();
   
+  done();
+});
+
+
+test("write any xml to file via c", async function(done) {
+  
+  // step 1 write nodes
+
+            // <Action ID="CloseDoor"/>
+            // <SubTree ID="DoorClosed"/>
+            // <Condition ID="IsDoorOpen"/>
+            // <Action ID="OpenDoor"/>
+            // <Action ID="PassThroughDoor"/>
+            // <Action ID="PassThroughWindow"/>
+
+  const actionNodes = [
+    'CloseDoor',
+    'OpenDoor',
+    'PassThroughDoor',
+    'PassThroughWindow',
+  ];
+
+  const conditionNodes = [
+    'IsDoorOpen',
+  ];
+
+
+  const dut = new BehaviorTreeFlatBuffer();
+
+  await dut.start();
+
+  await dut.setFilePath('./node2.fbl');
+
+  dut.registerActionNodes(actionNodes);
+  dut.registerConditionNodes(conditionNodes);
+
+  dut.parseXML(t05);
+
+  inject(dut, 1, 'idle', 'running');
+  await _sleep(50);
+  inject(dut, 2, 'idle', 'running');
+  await _sleep(50);
+  inject(dut, 3, 'idle', 'running');
+  inject(dut, 4, 'idle', 'failure');
+  inject(dut, 4, 'failure', 'idle');
+  await _sleep(50);
+  inject(dut, 3, 'running', 'failure');
+
+
+  // console.log(dut.treeNodeIds);
+  // console.log(dut.children);
+
+
   done();
 });

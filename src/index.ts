@@ -31,6 +31,9 @@ class BehaviorTreeFlatBuffer {
 
   setFilePath(path: string): Promise<void> {
 
+
+    this.bindFileWriter();
+
     const that = this;
 
     return new Promise((resolve, reject)=>{
@@ -107,15 +110,17 @@ class BehaviorTreeFlatBuffer {
     }, 'vii');
 
 
-    let passFn = wasm.cwrap('passFnPointer', 'void', ['number']);
+    let passFn = wasm.cwrap('pass_write_fn', 'void', ['number']);
 
     passFn(this.boundFnPtr);
 
   }
 
 
-
-  bindCallback2(): void {
+  // this binds the file writer into c
+  // every time the c has bytes to write to disk
+  // the lambda inside this function gets called
+  private bindFileWriter(): void {
 
     const wasm = this.wasm;
     const that = this;
@@ -131,7 +136,7 @@ class BehaviorTreeFlatBuffer {
       var myCharArray = wasm.HEAPU8.subarray(ptr, ptr+sz);
 
       if( that.fd == undefined ) {
-        console.log("Error: bindCallback2 requires fd to be set ");
+        console.log("Error: bindFileWriter requires fd to be set ");
         return;
       }
 
@@ -145,7 +150,7 @@ class BehaviorTreeFlatBuffer {
     }, 'vii');
 
 
-    let passFn = wasm.cwrap('passFnPointer', 'void', ['number']);
+    let passFn = wasm.cwrap('pass_write_fn', 'void', ['number']);
 
     passFn(this.boundFnPtr);
 
@@ -168,23 +173,43 @@ class BehaviorTreeFlatBuffer {
   bindCWrap(): void {
     const wasm = this.wasm;
     const c = this.c;
+    const w = wasm.cwrap;
 
-    c.int_sqrt              = wasm.cwrap('int_sqrt',              'number', ['number']);
-    c.debug_example         = wasm.cwrap('debug_example',         'void', ['void'])
-    c.callBoundJs           = wasm.cwrap('callBoundJs',           'void', ['void']);
-    c.get_saved_node_count  = wasm.cwrap('get_saved_node_count',  'number', ['void']);
-    c.get_saved_node_name   = wasm.cwrap('get_saved_node_name',   'string', ['number']);
-    c.get_saved_node_id     = wasm.cwrap('get_saved_node_id',     'number', ['number']);
-    c.get_child_node_count  = wasm.cwrap('get_child_node_count',  'number', ['number']);
-    c.get_child_node_id     = wasm.cwrap('get_child_node_id',     'number', ['number','number']);
-    c.logTransition         = wasm.cwrap('logTransition',         'void', ['number','number','number']);
-// uint32_t get_child_node_count(const uint32_t i) {
-// uint32_t get_child_node_id(const uint32_t i, const uint32_t j) {
+    c.int_sqrt                 = w('int_sqrt',                'number', ['number']);
+    c.debug_example            = w('debug_example',           'void', ['void'])
+    c.callBoundJs              = w('callBoundJs',             'void', ['void']);
+    c.get_saved_node_count     = w('get_saved_node_count',    'number', ['void']);
+    c.get_saved_node_name      = w('get_saved_node_name',     'string', ['number']);
+    c.get_saved_node_id        = w('get_saved_node_id',       'number', ['number']);
+    c.get_child_node_count     = w('get_child_node_count',    'number', ['number']);
+    c.get_child_node_id        = w('get_child_node_id',       'number', ['number','number']);
+    c.lt                       = w('lt',                      'void', ['number','number','number']);
+    c.register_action_node     = w('register_action_node',    'void', ['string']);
+    c.register_condition_node  = w('register_condition_node', 'void', ['string']);
+    c.unregister_builder       = w('unregister_builder',      'void', ['string']);
+    c.parse_xml                 = w('parse_xml',                'void', ['string']);
+  }
 
+  parseXML(xml: string): void {
+    this.c.parse_xml(xml);
+
+    this.extractNodeIds();
+  }
+
+  registerActionNodes(ns: string[]): void {
+    for(const n of ns) {
+      this.c.register_action_node(n);
+    }
+  }
+
+  registerConditionNodes(ns: string[]): void {
+    for(const n of ns) {
+      this.c.register_condition_node(n);
+    }
   }
 
   logTransition(uid: number, prev_status: number, status: number): void {
-    this.c.logTransition(uid, prev_status, status);
+    this.c.lt(uid, prev_status, status);
   }
 
   testAnything(): number {
@@ -227,8 +252,8 @@ class BehaviorTreeFlatBuffer {
 
     }
 
-    console.log(this.treeNodeIds);
-    console.log(this.children);
+    // console.log(this.treeNodeIds);
+    // console.log(this.children);
 
     // console.log(`Got ${count} xml nodes`);
   }
