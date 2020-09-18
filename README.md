@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer.svg?branch=master)](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer)
 # BehaviorTreeFlatBuffer
 A wrapper for BehaviorTree.CPP for the purpose of writing flatbuffers.  Pass a javascript callback and a valid Groot xml file.  A flatbuffer log will be written via the callback in Int8Array typed buffers.
 
