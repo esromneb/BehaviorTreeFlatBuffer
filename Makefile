@@ -12,11 +12,11 @@ important: wasm test_png
 WASM_MAIN = csrc/main.cpp
 
 HPP_FILES = \
-csrc/other.hpp \
+csrc/wrapper.hpp \
 
 
 CPP_FILES = \
-csrc/other.cpp \
+csrc/wrapper.cpp \
 lib/BehaviorTree.CPP/src/action_node.cpp \
 lib/BehaviorTree.CPP/src/basic_types.cpp \
 lib/BehaviorTree.CPP/src/behavior_tree.cpp \

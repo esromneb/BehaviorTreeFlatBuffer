@@ -1,12 +1,6 @@
-#include "other.hpp"
-
-
 #include <iostream>
 #include <vector>
-#include <stdint.h>
-#include <chrono>
 #include <unistd.h> //usleep
-#include <functional>
 #include <cmath>
 
 
@@ -28,23 +22,16 @@ int main(int argc, char ** argv) {
 }
 
 
-
-///
-/// These are some of the Javascript -> C++ functions
-///
-
 extern "C" {
 
 void somefn(void) {
     cout << "hi " << "somefn" << "\n";
 }
 
-int int_sqrt(int x) {
+int int_sqrt(const int x) {
     return sqrt(x);
 }
 
 
 } // extern C
-
-
 

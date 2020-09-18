@@ -1,29 +1,25 @@
-///
-/// See BehaviorTree.CPP/examples/t05_crossdoor.cpp
-/// This is testing to see how I can hijack the logger
-/// 
-///
-#include "other.hpp"
+#include "wrapper.hpp"
 
 #include "behaviortree_cpp_v3/loggers/bt_cout_logger.h"
 #include "behaviortree_cpp_v3/loggers/bt_minitrace_logger.h"
 #include "behaviortree_cpp_v3/loggers/bt_file_logger.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
 #include "behaviortree_cpp_v3/basic_types.h"
+#include "behaviortree_cpp_v3/loggers/abstract_logger.h"
+#include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
 
-
-
+#include <fstream>
+#include <deque>
+#include <array>
 #include <iostream>
+
 
 using namespace std;
 using namespace BT;
 
 
-
-
-
-
+#ifdef INCLUDE_TEST_CODE_FUNCTIONS
 
 static const char* xml_text = R"(
 <root main_tree_to_execute = "MainTree">
@@ -103,7 +99,7 @@ static const char* xml_text2 = R"(
 
  )";
 
-
+#endif
 
 
 
@@ -115,7 +111,7 @@ NodeStatus DummyFunction(void) {
 
 
 
-
+#ifdef INCLUDE_TEST_CODE_FUNCTIONS
 
 void register_functions(BehaviorTreeFactory& factory) {
     factory.registerSimpleCondition("IsDoorOpen", std::bind(DummyFunction));
@@ -127,6 +123,7 @@ void register_functions(BehaviorTreeFactory& factory) {
     factory.registerSimpleAction("UnlockDoor", std::bind(DummyFunction));
 }
 
+#endif
 
 // dumps xml nodes before they have an id
 // void dump_nodes(BehaviorTreeFactory& factory) {
@@ -139,10 +136,19 @@ void register_functions(BehaviorTreeFactory& factory) {
 // }
 
 
-std::vector<std::string> node_names;
-std::vector<uint32_t> node_ids;
-std::vector<std::vector<uint32_t>> children_ids;
+///
+/// File scope (static) vectors used for feeding information to js
+/// 
+static std::vector<std::string> node_names;
+static std::vector<uint32_t> node_ids;
+static std::vector<std::vector<uint32_t>> children_ids;
 
+/// Factory
+static BT::BehaviorTreeFactory factory;
+
+
+/// Saves tree node names, ids, and children to
+/// the static vectors
 void save_node_ids(const Tree &tree) {
     // size_t i = 0;
 
@@ -160,7 +166,9 @@ void save_node_ids(const Tree &tree) {
 
 
     auto visitor = [](BT::TreeNode * node) {
+#ifdef VERBOSE_WRAPPER
         cout << "Node " << node->registrationName() << " has children: ";
+#endif
 
         const uint32_t id = (uint32_t) node->UID();
 
@@ -170,8 +178,10 @@ void save_node_ids(const Tree &tree) {
             for (const auto& child : control->children())
             {
                 auto cc = static_cast<const TreeNode*>(child);
-                cout << " " << cc->registrationName();
 
+#ifdef VERBOSE_WRAPPER
+                cout << " " << cc->registrationName();
+#endif
                 children_ids[id].push_back(cc->UID());
 
                 // applyRecursiveVisitor(static_cast<const TreeNode*>(child), visitor);
@@ -180,33 +190,21 @@ void save_node_ids(const Tree &tree) {
        else if (auto decorator = dynamic_cast<const BT::DecoratorNode*>(node))
         {
             auto cc = decorator->child();
+
+#ifdef VERBOSE_WRAPPER
             cout << " " << cc->registrationName();
+#endif
+
             children_ids[id].push_back(cc->UID());
             // applyRecursiveVisitor(, visitor);
         }
 
+#ifdef VERBOSE_WRAPPER
         cout << "\n";
+#endif
 
-
-
-
-
-        // cout << node->
-        // node->halt();
-        // node->setStatus(BT::NodeStatus::IDLE);
     };
     BT::applyRecursiveVisitor(tree.rootNode(), visitor);
-
-
-
-
-
-
-
-
-
-
-
 
 }
 
@@ -233,22 +231,9 @@ uint32_t get_child_node_id(const uint32_t i, const uint32_t j) {
 }
 
 
-
 }
 
 
-void dump_tree_nodes(const Tree &tree) {
-    for( const auto& n : tree.nodes ) {
-        cout << n->registrationName() << "->" << n->UID() << "\n";
-    }
-}
-
-#include <fstream>
-#include <deque>
-#include <array>
-
-#include "behaviortree_cpp_v3/loggers/abstract_logger.h"
-#include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
 
 typedef void testExternalJSMethod(const unsigned char* const data, const size_t sz);
@@ -260,10 +245,10 @@ extern "C" {
 
 void pass_write_fn(int ptr) {
     gptr = (testExternalJSMethod*)ptr;
-    // ((testExternalJSMethod*)ptr)();
 }
 
 
+#ifdef VERBOSE_WRAPPER
 void callBoundJs(void) {
     unsigned char buf[8];
     buf[0] = 'a';
@@ -272,6 +257,8 @@ void callBoundJs(void) {
     buf[3] = '\0';
     gptr(buf, 4);
 }
+#endif
+
 
 } // extern
 
@@ -336,7 +323,14 @@ void lt(const int uid, const int prev_status, const int status) {
     writeToJs(reinterpret_cast<const unsigned char*>(buffer.data()), buffer.size());
 }
 
-BT::BehaviorTreeFactory factory;
+
+#ifdef VERBOSE_WRAPPER
+
+void dump_tree_nodes(const Tree &tree) {
+    for( const auto& n : tree.nodes ) {
+        cout << n->registrationName() << "->" << n->UID() << "\n";
+    }
+}
 
 void debug_example(void) {
     parse_time = std::chrono::steady_clock::now();
@@ -363,6 +357,10 @@ void debug_example(void) {
 
     write_tree_header_to_js(tree);
 }
+
+#endif
+
+
 
 // pass an action or condition node name
 void unregister_builder(const char* name) {
