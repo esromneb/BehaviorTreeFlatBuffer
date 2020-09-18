@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer.svg?branch=master)](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer)
 # BehaviorTreeFlatBuffer
-A wrapper for BehaviorTree.CPP for the purpose of writing flatbuffers.  Pass a javascript callback and a valid Groot xml file.  A flatbuffer log will be written via the callback in Int8Array typed buffers.
+A wrapper for [BehaviorTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP) for the purpose of writing FlatBuffers.  Pass a javascript callback and a valid [Groot](https://github.com/BehaviorTree/Groot) xml file.  A log in FlatBuffer format will be written via the callback in Int8Array Buffers.
 
 # Dependencies
 * emscripten compiler (I'm using) `1.39.11`
