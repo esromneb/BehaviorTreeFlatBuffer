@@ -20,3 +20,8 @@ void debug_example(void);
 
 
 }
+
+
+#define INCLUDE_TEST_CODE_FUNCTIONS
+
+
