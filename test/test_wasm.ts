@@ -1,4 +1,5 @@
 const t05 = require("./btrees/t05.xml");
+const testTree14 = require("./btrees/testTree14.xml");
 
 
 function waitForStart(mod): Promise<void> {
@@ -217,7 +218,7 @@ inject(dut, 1, 'success', 'idle');
 });
 
 
-test("write any xml to file via c", async function(done) {
+test.skip("write any xml to file via c", async function(done) {
   
   // step 1 write nodes
 
@@ -268,3 +269,54 @@ test("write any xml to file via c", async function(done) {
 
   done();
 });
+
+
+test("testtree14 to fbl", async function(done) {
+  
+
+  const actionNodes = [
+    'inOnlyA',
+    'inOnlyB',
+    'outOnlyA',
+    'outOnlyB',
+    'outOnlyC',
+    'outOnlyD',
+    'outOnlyE',
+    'outOnlyF',
+    ];
+
+  const conditionNodes = [
+    'IsDoorOpen',
+  ];
+
+
+  const dut = new BehaviorTreeFlatBuffer();
+
+  await dut.start();
+
+  await dut.setFilePath('./node14.fbl');
+
+  dut.registerActionNodes(actionNodes);
+  dut.registerConditionNodes(conditionNodes);
+
+  dut.parseXML(testTree14);
+
+  inject(dut, 1, 'idle', 'running');
+  await _sleep(50);
+  inject(dut, 2, 'idle', 'running');
+  await _sleep(50);
+  // inject(dut, 3, 'idle', 'running');
+  // inject(dut, 4, 'idle', 'failure');
+  // inject(dut, 4, 'failure', 'idle');
+  // await _sleep(50);
+  // inject(dut, 3, 'running', 'failure');
+
+
+  // console.log(dut.treeNodeIds);
+  // console.log(dut.children);
+
+
+  done();
+});
+
+

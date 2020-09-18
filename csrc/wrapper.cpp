@@ -1,5 +1,7 @@
 #include "wrapper.hpp"
 
+#include "debug_data.hpp"
+
 #include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
 #include <vector>
@@ -9,87 +11,31 @@ using namespace std;
 using namespace BT;
 
 
-#ifdef INCLUDE_TEST_CODE_FUNCTIONS
-
-static const char* xml_text = R"(
-<root main_tree_to_execute = "MainTree">
-    <!--------------------------------------->
-    <BehaviorTree ID="DoorClosed">
-        <Sequence name="door_closed_sequence">
-            <Inverter>
-                <Condition ID="IsDoorOpen"/>
-            </Inverter>
-            <RetryUntilSuccesful num_attempts="4">
-                <OpenDoor/>
-            </RetryUntilSuccesful>
-            <PassThroughDoor/>
-        </Sequence>
-    </BehaviorTree>
-    <!--------------------------------------->
-    <BehaviorTree ID="MainTree">
-        <Sequence>
-            <Fallback name="root_Fallback">
-                <Sequence name="door_open_sequence">
-                    <IsDoorOpen/>
-                    <PassThroughDoor/>
-                </Sequence>
-                <SubTree ID="DoorClosed"/>
-                <PassThroughWindow/>
-            </Fallback>
-            <CloseDoor/>
-        </Sequence>
-    </BehaviorTree>
-    <!---------------------------------------> 
-</root>
- )";
 
 
-static const char* xml_text2 = R"(
-<?xml version="1.0"?>
-<root main_tree_to_execute="MainTree">
-    <!-- ////////// -->
-    <BehaviorTree ID="DoorClosed">
-        <Sequence name="door_closed_sequence">
-            <Inverter>
-                <Condition ID="IsDoorOpen"/>
-            </Inverter>
-            <RetryUntilSuccesful num_attempts="4">
-                <Action ID="OpenDoor"/>
-            </RetryUntilSuccesful>
-            <Action ID="PassThroughDoor"/>
-        </Sequence>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <BehaviorTree ID="MainTree">
-        <Sequence>
-            <Sequence>
-                <Fallback name="root_Fallback">
-                    <Sequence name="door_open_sequence">
-                        <Condition ID="IsDoorOpen"/>
-                        <Action ID="PassThroughDoor"/>
-                    </Sequence>
-                    <SubTree ID="DoorClosed"/>
-                    <Action ID="PassThroughWindow"/>
-                </Fallback>
-                <Action ID="CloseDoor"/>
-            </Sequence>
-        </Sequence>
-    </BehaviorTree>
-    <!-- ////////// -->
-    <TreeNodesModel>
-        <Action ID="CloseDoor"/>
-        <SubTree ID="DoorClosed"/>
-        <Condition ID="IsDoorOpen"/>
-        <Action ID="OpenDoor"/>
-        <Action ID="PassThroughDoor"/>
-        <Action ID="PassThroughWindow"/>
-    </TreeNodesModel>
-    <!-- ////////// -->
-</root>
 
- )";
+///
+/// File scope (static) vectors used for feeding information to js
+/// 
+static std::vector<std::string> node_names;
+static std::vector<uint32_t> node_ids;
+static std::vector<std::vector<uint32_t>> children_ids;
 
-#endif
+/// Factory
+static BT::BehaviorTreeFactory factory;
+
+/// Used in timing
+static std::chrono::steady_clock::time_point parse_time;
+
+/// Typedef used as part of c->js call
+typedef void testExternalJSMethod(const unsigned char* const data, const size_t sz);
+
+/// function pointer for c->js
+static testExternalJSMethod* gptr = 0;
+
+
+
+
 
 
 ///
@@ -101,6 +47,7 @@ NodeStatus DummyFunction(void) {
 
     // This is just a convenient place/function to put
     // these to ignore unused variable warnings
+    // see debug_data.hpp
 #ifdef VERBOSE_WRAPPER
     (void)xml_text;
     (void)xml_text2;
@@ -135,19 +82,6 @@ void register_functions(BehaviorTreeFactory& factory) {
 //     }
 // }
 
-
-///
-/// File scope (static) vectors used for feeding information to js
-/// 
-static std::vector<std::string> node_names;
-static std::vector<uint32_t> node_ids;
-static std::vector<std::vector<uint32_t>> children_ids;
-
-/// Factory
-static BT::BehaviorTreeFactory factory;
-
-/// Used in timing
-static std::chrono::steady_clock::time_point parse_time;
 
 /// Saves tree node names, ids, and children to
 /// the static vectors
@@ -232,21 +166,12 @@ uint32_t get_child_node_id(const uint32_t i, const uint32_t j) {
     return children_ids[i][j];
 }
 
-
-}
-
-
-
-
-typedef void testExternalJSMethod(const unsigned char* const data, const size_t sz);
-
-
-static testExternalJSMethod* gptr = 0;
-
-extern "C" {
-
 void pass_write_fn(int ptr) {
     gptr = (testExternalJSMethod*)ptr;
+}
+
+bool write_fn_is_set(void) {
+    return gptr != 0;
 }
 
 
@@ -274,14 +199,16 @@ void myPrintWrite(const unsigned char* const data, const size_t sz) {
 }
 
 void writeToJs(const unsigned char* const data, const size_t sz) {
-    if( gptr == 0 ) {
-        cout << "writeToJs() called when gptr was null, dropping these bytes:\n";
+    if( !write_fn_is_set() ) {
+        cout << "writeToJs() called when gptr was null (pass_write_fn() was not called), dropping these bytes:\n";
         myPrintWrite(data, sz);
         return;
     }
 
     gptr(data, sz);
 }
+
+
 
 
 
@@ -379,18 +306,52 @@ void register_condition_node(const char* name) {
 
 ///
 /// Main entry point
-///
-void parse_xml(const char* xml) {
+/// returns non 0 for error, 1 for success
+int parse_xml(const char* xml) {
+
+    // move early as possible
     parse_time = std::chrono::steady_clock::now();
 
-    // parse BehaviorTree
-    auto tree = factory.createTreeFromText(xml);
+    if( xml == 0 ) {
+        cout << "parse_xml() called with null string\n";
+        return 1;
+    }
+
+    // a conservative minimum limit of an xml file
+    // <rootmain_tree_to_execute?=""></root>
+    // 
+
+    const int minlen = 36; // xml less than this is clearly busted
+
+    const int slen = strlen(xml);
+
+    if( slen < minlen ) {
+        cout << "parse_xml() called with too short string (" << slen << "<" << minlen << ") \n";
+        return 2;
+    }
+
+
+    Tree tree;
+    try {
+        // parse BehaviorTree
+        tree = factory.createTreeFromText(xml);
+    } catch (BehaviorTreeException e) {
+        cout << "Exception: " << e.what() << "\n";
+        return 3;
+    }
+
+    if( !write_fn_is_set() ) {
+        cout << "parse_xml() was called without the javascript callback being set first via pass_write_fn()\n";
+        return 4;
+    }
 
     // pull out the node IDS into the vectors in this file
     save_node_ids(tree);
 
     // write to the js callback with byte data for the log header
     write_tree_header_to_js(tree);
+
+    return 0;
 }
 
 }

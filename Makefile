@@ -99,6 +99,7 @@ endif
 out/btfb.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	mkdir -p out
 	emcc $(WASM_MAIN) $(CPP_FILES) -s WASM=1 -o out/btfb.html \
+	-s DISABLE_EXCEPTION_CATCHING=0 \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s ALLOW_TABLE_GROWTH=1 \
 	-s EXPORTED_FUNCTIONS='[$(EXPORT_STRING) "_main"]' \

@@ -192,11 +192,15 @@ class BehaviorTreeFlatBuffer {
     c.register_action_node     = w('register_action_node',    'void', ['string']);
     c.register_condition_node  = w('register_condition_node', 'void', ['string']);
     c.unregister_builder       = w('unregister_builder',      'void', ['string']);
-    c.parse_xml                = w('parse_xml',               'void', ['string']);
+    c.parse_xml                = w('parse_xml',               'number', ['string']);
   }
 
   parseXML(xml: string): void {
-    this.c.parse_xml(xml);
+    const ret = this.c.parse_xml(xml);
+
+    if( ret !== 0 ) {
+      throw new Error(`parse_xml() c function returned error: ${ret}`);
+    }
 
     this.extractNodeIds();
   }
