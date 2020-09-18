@@ -1,13 +1,6 @@
 #include "wrapper.hpp"
 
-#include "behaviortree_cpp_v3/loggers/bt_cout_logger.h"
-#include "behaviortree_cpp_v3/loggers/bt_minitrace_logger.h"
-#include "behaviortree_cpp_v3/loggers/bt_file_logger.h"
-#include "behaviortree_cpp_v3/bt_factory.h"
-#include "behaviortree_cpp_v3/basic_types.h"
-#include "behaviortree_cpp_v3/loggers/abstract_logger.h"
 #include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
-
 
 #include <fstream>
 #include <deque>
