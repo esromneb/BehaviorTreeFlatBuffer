@@ -1,5 +1,17 @@
 # BehaviorTreeFlatBuffer
-Attempt to wrap BehaviorTree.CPP for the purpose of writing flatbuffers
+A wrapper for BehaviorTree.CPP for the purpose of writing flatbuffers.  Pass a javascript callback and a valid Groot xml file.  A flatbuffer log will be written via the callback in Int8Array typed buffers.
+
+# Dependencies
+* emscripten compiler (I'm using) `1.39.11`
+* https://github.com/BehaviorTree/BehaviorTree.CPP (included via submodule)
+
+# Publish notes to myself
+* Publish with:
+```bash
+make
+npm run build
+```
+
 
 # Notes to myself
 * Pass in xml
