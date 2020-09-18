@@ -1,0 +1,4 @@
+34c34
+<         this.wasm = require('../out/btfb.js');
+---
+>         this.wasm = require('./btfb.js');

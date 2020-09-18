@@ -16,12 +16,11 @@ npm run build
 ```
 
 
-# Notes to myself
-* Pass in xml
-* write new code to grab uid from tree
-* copy bt_file_logger calls
-
-* I could practice writing the file with baked xml and a few baked uid calls
+# Quirks about WASM
+* Not sure if I know how to shutdown the wasm properly. It may be better to only have one instance
+  * This stems from how I am including the `.js` file output by emscripten.  Not sure how to fix this.
+* My test has the wasm file in the path of `/out` where it is built, but publish requires a different path
+  * Thus I patch the `.js` file
 
 
 # See Also Emscripten
