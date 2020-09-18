@@ -1,12 +1,7 @@
+.PHONY: wasm all important clean
 
-.PHONY: wasm all important clean e
-
-
+all: wasm
 wasm: out/btfb.wasm
-
-all: test_png test_parse test_refl test_vec test_orbit wasm
-
-important: wasm test_png
 
 
 WASM_MAIN = csrc/main.cpp
@@ -46,8 +41,6 @@ lib/BehaviorTree.CPP/src/loggers/bt_file_logger.cpp \
 lib/BehaviorTree.CPP/src/private/tinyxml2.cpp \
 lib/BehaviorTree.CPP/src/xml_parsing.cpp \
 
-# lib/BehaviorTree.CPP/src/loggers/bt_minitrace_logger.cpp \
-
 
 # this is a list of all C functions we want to publish to javascript
 # In the main cpp file, each of these is wrapped in extern "C" {}
@@ -78,9 +71,9 @@ CLANG_WARN_FLAGS = \
 -Wall -Wextra \
 -Wno-ignored-qualifiers \
 -Wundef \
--Werror=return-type
+-Werror=return-type \
+-Wshadow \
 # -Wconversion
-# -Wshadow
 
 
 CLANG_OTHER_FLAGS = \
@@ -114,37 +107,6 @@ out/btfb.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 
 
 
-# '-Wshadow-all'
-#--proxy-to-worker \
-#-s PROXY_TO_WORKER_FILENAME='custom.ray' \
-
-# not working due to chrome not liking these options
-#-s USE_PTHREADS=1 -s RESERVED_FUNCTION_POINTERS=1
-#-s PTHREAD_POOL_SIZE=4
-
-.PHONY: copy_files_target copy
-
-copy: copy_files_target
-
-
-
-# I forget how to copy file and do the sensativity list thing correctly
-# so for now this needs to be manual
-
-COPY_LIST = \
-template/jquery-3.4.1.min.js \
-template/LoadSave.js \
-template/GIFEncoder.js \
-template/LZWEncoder.js \
-template/NeuQuant.js \
-template/b64.js \
-template/doubleRayInstantiate.js \
-template/doubleRayControls.js
-
-
-
-
-
 .PHONY: all build watch dev start test pretest lint jestc
 .PHONY: test
 
@@ -165,9 +127,4 @@ jestw:
 clean:
 	rm -rf out/*
 	rm -rf dist/*
-
-
-
-# build_publish: copy out/doubleRayBridge.js dist/ray.wasm 
-
 
