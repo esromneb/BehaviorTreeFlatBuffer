@@ -107,7 +107,7 @@ out/btfb.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 
 
 
-.PHONY: all build watch dev start test pretest lint jestc
+.PHONY: all build watch dev start test pretest lint jestc copydist
 .PHONY: test
 
 build:
@@ -122,6 +122,9 @@ jestc:
 # jest watch tests
 jestw:
 	npm run jestw
+
+copydist:
+	npm run copydist
 
 
 clean:
