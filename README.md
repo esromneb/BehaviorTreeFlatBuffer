@@ -11,8 +11,8 @@ A wrapper for [BehaviorTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CP
 ```bash
 nvm use 14
 source emsdk/emsdk_env.sh
-make
-npm run build
+make wasm build
+npm publish
 ```
 
 
