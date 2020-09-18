@@ -17,6 +17,7 @@
     "build": "tsc && npm run copydist",
     "tsc": "tsc",
     "clean": "rimraf dist out",
+    "cleandist": "rimraf dist",
     "copydist": "copyfiles --error --verbose --flat out/btfb.wasm out/btfb.js dist"
   },
   "repository": {
