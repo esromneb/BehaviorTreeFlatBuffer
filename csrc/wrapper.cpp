@@ -2,11 +2,8 @@
 
 #include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
-#include <fstream>
-#include <deque>
-#include <array>
+#include <vector>
 #include <iostream>
-
 
 using namespace std;
 using namespace BT;
