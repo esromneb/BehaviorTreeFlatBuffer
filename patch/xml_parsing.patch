@@ -1,0 +1,20 @@
+508,516c508,516
+<         for(const auto& remap_it: port_remap)
+<         {
+<             if( manifest.ports.count( remap_it.first ) == 0 )
+<             {
+<                 throw RuntimeError("Possible typo? In the XML, you tried to remap port \"",
+<                                    remap_it.first, "\" in node [", ID," / ", instance_name,
+<                                    "], but the manifest of this node does not contain a port with this name.");
+<             }
+<         }
+---
+>         // for(const auto& remap_it: port_remap)
+>         // {
+>         //     if( manifest.ports.count( remap_it.first ) == 0 )
+>         //     {
+>         //         throw RuntimeError("Possible typo? In the XML, you tried to remap port \"",
+>         //                            remap_it.first, "\" in node [", ID," / ", instance_name,
+>         //                            "], but the manifest of this node does not contain a port with this name.");
+>         //     }
+>         // }

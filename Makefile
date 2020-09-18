@@ -1,4 +1,4 @@
-.PHONY: wasm all important clean
+.PHONY: wasm all important clean patchlib
 
 all: wasm
 wasm: out/btfb.wasm
@@ -96,7 +96,7 @@ endif
 # works however slows down
 #-s DISABLE_EXCEPTION_CATCHING=0 \
 
-out/btfb.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
+out/btfb.wasm: patchlib $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	mkdir -p out
 	emcc $(WASM_MAIN) $(CPP_FILES) -s WASM=1 -o out/btfb.html \
 	-s DISABLE_EXCEPTION_CATCHING=0 \
@@ -107,6 +107,39 @@ out/btfb.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
 
 
+
+PTSRC=lib/BehaviorTree.CPP/src/xml_parsing.cpp
+PTPAT=patch/xml_parsing.patch
+
+
+# forward returns an error if the patch is already applied
+# reject
+# patchlibog: patch/xml_parsing.patch
+# 	patch --forward --reject-file=- $(PTSRC) < $(PTPAT)
+
+# patchlib2:
+# 	patch -p0 -N --dry-run --silent $(PTSRC) < $(PTPAT) # 2>/dev/null
+
+# patchlib3:
+# 	patch -R -p0 -s -f --dry-run $(PTSRC) < $(PTPAT)
+
+
+# see https://stackoverflow.com/questions/7394290/how-to-check-return-value-from-the-shell-directive
+PAPPLIED := $(shell patch -R -p0 -s -f --dry-run $(PTSRC) < $(PTPAT) 1>&2 2> /dev/null > /dev/null; echo $$?)
+
+# patch is pretty annoying to use here
+# we would like to apply the patch, or skip if already applied exit 0
+# inorder to do this, we first need to run a dry-run in the reverse direction
+# then check the exit code, then run it in the forward direction if actually needed
+# we also have to do the complicated line above to deal with exit codes
+# see https://unix.stackexchange.com/questions/55780/check-if-a-file-or-folder-has-been-patched-already
+patchlib: patch/xml_parsing.patch
+ifneq ($(PAPPLIED),0)
+	@echo "$(PTSRC) is unpatched.\n"
+	patch --forward --reject-file=- $(PTSRC) < $(PTPAT)
+else
+	@echo "$(PTSRC) already patched, skipping..."
+endif
 
 .PHONY: all build watch dev start test pretest lint jestc copydist cleandist
 .PHONY: test

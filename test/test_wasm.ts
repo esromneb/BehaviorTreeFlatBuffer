@@ -1,5 +1,6 @@
 const t05 = require("./btrees/t05.xml");
 const testTree14 = require("./btrees/testTree14.xml");
+const fs = require('fs');
 
 
 function waitForStart(mod): Promise<void> {
@@ -273,6 +274,11 @@ test.skip("write any xml to file via c", async function(done) {
 
 test("testtree14 to fbl", async function(done) {
   
+  const outputPath = './node14.fbl';
+
+  try {
+    fs.unlinkSync(outputPath);
+  } catch(e) {}
 
   const actionNodes = [
     'inOnlyA',
@@ -294,7 +300,7 @@ test("testtree14 to fbl", async function(done) {
 
   await dut.start();
 
-  await dut.setFilePath('./node14.fbl');
+  await dut.setFilePath(outputPath);
 
   dut.registerActionNodes(actionNodes);
   dut.registerConditionNodes(conditionNodes);
@@ -303,8 +309,8 @@ test("testtree14 to fbl", async function(done) {
 
   inject(dut, 1, 'idle', 'running');
   await _sleep(50);
-  inject(dut, 2, 'idle', 'running');
-  await _sleep(50);
+  // inject(dut, 2, 'idle', 'running');
+  // await _sleep(50);
   // inject(dut, 3, 'idle', 'running');
   // inject(dut, 4, 'idle', 'failure');
   // inject(dut, 4, 'failure', 'idle');

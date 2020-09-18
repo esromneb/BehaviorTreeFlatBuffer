@@ -22,6 +22,13 @@ npm publish
 * My test has the wasm file in the path of `/out` where it is built, but publish requires a different path
   * Thus I patch the `.js` file
 
+# Quirks about wrapper
+* BehaviorTree.CPP is well written and throws many errors during the operations I need.  Thus I patched out some error checking.  I generated the patch with:
+```bash
+cd lib/BehaviorTree.CPP/src
+diff xml_parsing.cpp xml_parsing2.cpp > ../../../patch/xml_parsing.patch
+```
+
 
 # See Also Emscripten
 * https://github.com/Planeshifter/emscripten-examples/tree/master/01_PassingArrays  Arrays js->C
@@ -31,3 +38,6 @@ npm publish
 * https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-javascript-functions-as-function-pointers-from-c Types for c->js
 
 
+# See Also Make/patch
+* https://stackoverflow.com/questions/7394290/how-to-check-return-value-from-the-shell-directive deal with exit codes from make
+* https://unix.stackexchange.com/questions/55780/check-if-a-file-or-folder-has-been-patched-already only patch if not patched
