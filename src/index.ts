@@ -10,16 +10,21 @@ function _waitForStart(mod): Promise<void> {
 class BehaviorTreeFlatBuffer {
   wasm: any;
 
+  logStartup: boolean = false;
   logWrites: boolean = false;
 
   constructor(public options = {}) {
-    console.log('ctons');
+    if( this.logStartup ) {
+      console.log('ctons');
+    }
 
     this.wasm = require('../out/btfb.js');
   }
 
   async start(): Promise<void> {
-    console.log('start');
+    if( this.logStartup ) {
+      console.log('start');
+    }
     await _waitForStart(this.wasm);
 
 
@@ -187,7 +192,7 @@ class BehaviorTreeFlatBuffer {
     c.register_action_node     = w('register_action_node',    'void', ['string']);
     c.register_condition_node  = w('register_condition_node', 'void', ['string']);
     c.unregister_builder       = w('unregister_builder',      'void', ['string']);
-    c.parse_xml                 = w('parse_xml',                'void', ['string']);
+    c.parse_xml                = w('parse_xml',               'void', ['string']);
   }
 
   parseXML(xml: string): void {

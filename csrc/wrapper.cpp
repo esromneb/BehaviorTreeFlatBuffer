@@ -102,10 +102,20 @@ static const char* xml_text2 = R"(
 #endif
 
 
-
+///
+/// BehaviorTree library requires that a function is bound
+/// before we parse the xml tree
+/// This function is bound to every action and condition node
+///
 NodeStatus DummyFunction(void) {
+
+    // This is just a convenient place/function to put
+    // these to ignore unused variable warnings
+#ifdef VERBOSE_WRAPPER
     (void)xml_text;
     (void)xml_text2;
+#endif
+
     return NodeStatus::SUCCESS;
 }
 
@@ -146,6 +156,8 @@ static std::vector<std::vector<uint32_t>> children_ids;
 /// Factory
 static BT::BehaviorTreeFactory factory;
 
+/// Used in timing
+static std::chrono::steady_clock::time_point parse_time;
 
 /// Saves tree node names, ids, and children to
 /// the static vectors
@@ -307,7 +319,7 @@ void write_tree_header_to_js(const Tree &tree) {
     // file_os_.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
 }
 
-std::chrono::steady_clock::time_point parse_time;
+
 
 
 extern "C" {
@@ -365,7 +377,6 @@ void debug_example(void) {
 // pass an action or condition node name
 void unregister_builder(const char* name) {
     factory.unregisterBuilder(name);
-
 }
 
 void register_action_node(const char* name) {
@@ -376,6 +387,9 @@ void register_condition_node(const char* name) {
     factory.registerSimpleCondition(name, std::bind(DummyFunction));
 }
 
+///
+/// Main entry point
+///
 void parse_xml(const char* xml) {
     parse_time = std::chrono::steady_clock::now();
 

@@ -58,9 +58,7 @@ WASM_CPP_FILES = \
 EXPORT_STRING = \
 "_somefn", \
 "_int_sqrt", \
-"_debug_example", \
 "_pass_write_fn", \
-"_callBoundJs", \
 "_get_saved_node_count", \
 "_get_saved_node_name", \
 "_get_saved_node_id", \
@@ -71,6 +69,10 @@ EXPORT_STRING = \
 "_unregister_builder", \
 "_parse_xml", \
 "_lt", \
+
+# Functions used in debugging
+# "_callBoundJs", \
+# "_debug_example", \
 
 # TEMPLATE_FILE = template/proxy_controls.html
 # JS_TEMPLATE_FILE = template/pre.ray.js
