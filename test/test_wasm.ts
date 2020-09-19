@@ -309,10 +309,8 @@ test("write same xml twice to file", async function(done) {
 
   for(let i = 0; i < 2; i++) {
 
-    console.log('RRRRRRRRRRRRRRRRRRRRReset');
     await _sleep(100);
 
-    dut.reset();
 
     const extra = i === 1;
 
@@ -327,26 +325,28 @@ test("write same xml twice to file", async function(done) {
 
     // console.log(dut.treeNodeIds);
 
-    inject(dut, 1, 'idle', 'running');
-    await _sleep(50);
-    inject(dut, 2, 'idle', 'running');
-    await _sleep(50);
-    inject(dut, 3, 'idle', 'running');
-    if( extra ) {
-      await _sleep(250);
-    }
-    inject(dut, 4, 'idle', 'failure');
-    if( extra ) {
-      await _sleep(250);
-    }
-    inject(dut, 4, 'failure', 'idle');
-    await _sleep(50);
-    if( extra ) {
-      await _sleep(250);
-    }
-    inject(dut, 3, 'running', 'failure');
+    // inject(dut, 1, 'idle', 'running');
+    // await _sleep(50);
+    // inject(dut, 2, 'idle', 'running');
+    // await _sleep(50);
+    // inject(dut, 3, 'idle', 'running');
+    // if( extra ) {
+    //   await _sleep(250);
+    // }
+    // inject(dut, 4, 'idle', 'failure');
+    // if( extra ) {
+    //   await _sleep(250);
+    // }
+    // inject(dut, 4, 'failure', 'idle');
+    // await _sleep(50);
+    // if( extra ) {
+    //   await _sleep(250);
+    // }
+    // inject(dut, 3, 'running', 'failure');
 
     console.log('bottom');
+    console.log('RRRRRRRRRRRRRRRRRRRRReset');
+    dut.reset();
 
   }
 

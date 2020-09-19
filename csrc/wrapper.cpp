@@ -100,6 +100,7 @@ void reset_trackers(void) {
 /// the static vectors
 void save_node_ids(const Tree &tree) {
     // size_t i = 0;
+try {
 
     reset_trackers();
 
@@ -121,19 +122,28 @@ void save_node_ids(const Tree &tree) {
         cout << "Node " << node->registrationName() << " has children: ";
 #endif
 
+        cout << "1111\n";
+
         const uint32_t id = (uint32_t) node->UID();
 
+        cout << "2222\n";
 
         if (auto control = dynamic_cast<const BT::ControlNode*>(node))
         {
+            cout << "3333\n";
             for (const auto& child : control->children())
             {
+                cout << "4444\n";
                 auto cc = static_cast<const TreeNode*>(child);
+
+                cout << "5555\n";
 
 #ifdef VERBOSE_WRAPPER
                 cout << " " << cc->registrationName();
 #endif
+                cout << "6666\n";
                 children_ids[id].push_back(cc->UID());
+                cout << "7777\n";
 
                 // applyRecursiveVisitor(static_cast<const TreeNode*>(child), visitor);
             }
@@ -157,6 +167,9 @@ void save_node_ids(const Tree &tree) {
     };
     BT::applyRecursiveVisitor(tree.rootNode(), visitor);
 
+} catch (BehaviorTreeException e) {
+cout << "Exception (save_node_ids): " << e.what() << "\n";
+}
 }
 
 extern "C" {
@@ -344,12 +357,11 @@ void reset_factory(void) {
 }
 
 void reset_all(void) {
-try {
-    reset_trackers();
-    reset_factory();
-} catch (BehaviorTreeException e) {
+    try {
+        reset_trackers();
+        reset_factory();
+    } catch (BehaviorTreeException e) {
         cout << "Exception (reset_all): " << e.what() << "\n";
-
     }
 
 }
@@ -398,11 +410,19 @@ int parse_xml(const char* xml) {
         return 4;
     }
 
-    // pull out the node IDS into the vectors in this file
-    save_node_ids(tree);
+    try {
 
-    // write to the js callback with byte data for the log header
-    write_tree_header_to_js(tree);
+        // pull out the node IDS into the vectors in this file
+        save_node_ids(tree);
+
+        // write to the js callback with byte data for the log header
+        write_tree_header_to_js(tree);
+
+    } catch (exception e) {
+            cout << "Exception:2 " << e.what() << "\n";
+            return 5;
+        }
+
 
     return 0;
 }
