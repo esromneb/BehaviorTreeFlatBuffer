@@ -363,7 +363,7 @@ void reset_all(void) {
         reset_trackers();
         reset_factory();
     } catch (exception e) {
-        cout << "Exception (reset_all): " << e.what() << "\n";
+        cout << "Exception(reset_all): " << e.what() << "\n";
     }
 
 }
@@ -403,7 +403,7 @@ int parse_xml(const char* xml) {
         // parse BehaviorTree
         tree = factory->createTreeFromText(xml);
     } catch (BehaviorTreeException e) {
-        cout << "Exception: " << e.what() << "\n";
+        cout << "Exception(3): " << e.what() << "\n";
         return 3;
     }
 
@@ -421,12 +421,12 @@ int parse_xml(const char* xml) {
         write_tree_header_to_js(tree);
 
     } catch (exception e) {
-            cout << "Exception:2 " << e.what() << "\n";
-            return 5;
-        }
-
+        cout << "Exception(5): " << e.what() << "\n";
+        return 5;
+    }
 
     return 0;
 }
 
-}
+
+} // extern c
