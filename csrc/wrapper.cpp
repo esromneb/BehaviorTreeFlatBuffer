@@ -277,6 +277,7 @@ void write_tree_header_to_js(const Tree &tree) {
 extern "C" {
 
 // returns 0 for success
+// log transition
 int lt(const int uid, const int prev_status, const int status) {
     // grab now asap
     const auto now = std::chrono::high_resolution_clock::now();
@@ -288,6 +289,33 @@ int lt(const int uid, const int prev_status, const int status) {
     }
 
     const auto duration = now-parse_time;
+
+    SerializedTransition buffer =
+        SerializeTransition(uid, duration, (NodeStatus)prev_status, (NodeStatus)status);
+    
+    writeToJs(reinterpret_cast<const unsigned char*>(buffer.data()), buffer.size());
+    return 0;
+}
+
+// returns 0 for success
+// log transition duration
+int ltd(const int uid, const int prev_status, const int status, const int duration_ms) {
+    // grab now asap
+    // const auto now = std::chrono::high_resolution_clock::now();
+
+
+    // such a pain in the as to make a duration type
+    // I got lucky and got the full descripton of the type in a compiler error
+    std::chrono::milliseconds as_ms{duration_ms}; 
+    std::chrono::duration<long int, std::ratio<1l, 1000000000l>> duration = as_ms;
+
+    // verify if this is a valid uid
+    if( children_ids.count(uid) == 0 ) {
+        cout << "Error: UID " << uid << " is not valid\n";
+        return 1;
+    }
+
+    // const auto duration = now-parse_time;
 
     SerializedTransition buffer =
         SerializeTransition(uid, duration, (NodeStatus)prev_status, (NodeStatus)status);

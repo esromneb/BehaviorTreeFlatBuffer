@@ -263,6 +263,7 @@ class BehaviorTreeFlatBuffer {
     c.get_child_node_count     = w('get_child_node_count',    'number', ['number']);
     c.get_child_node_id        = w('get_child_node_id',       'number', ['number','number']);
     c.lt                       = w('lt',                      'number', ['number','number','number']);
+    c.ltd                      = w('ltd',                     'number', ['number','number','number','number']);
     c.register_action_node     = w('register_action_node',    'void', ['string']);
     c.register_condition_node  = w('register_condition_node', 'void', ['string']);
     c.unregister_builder       = w('unregister_builder',      'void', ['string']);
@@ -298,6 +299,13 @@ class BehaviorTreeFlatBuffer {
     const ret = this.c.lt(uid, prev_status, status);
     if( ret !== 0 ) {
       throw new Error(`lt() c function returned error: ${ret}`);
+    }
+  }
+
+  logTransitionDuration(uid: number, prev_status: number, status: number, duration_ms: number): void {
+    const ret = this.c.ltd(uid, prev_status, status, duration_ms);
+    if( ret !== 0 ) {
+      throw new Error(`ltd() c function returned error: ${ret}`);
     }
   }
 

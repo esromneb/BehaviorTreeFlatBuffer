@@ -128,8 +128,19 @@ function inject(dut, id, p: string, n: string): void {
 
 
   dut.logTransition(id, t[p], t[n]);
+}
 
 
+function injectD(dut, id, p: string, n: string, duraton: number): void {
+  const t = {
+    idle: 0,
+    running: 1,
+    success: 2,
+    failure: 3
+  };
+
+
+  dut.logTransitionDuration(id, t[p], t[n], duraton);
 }
 
 
@@ -327,24 +338,24 @@ test("write same xml twice to file", async function(done) {
 
     // console.log(dut.treeNodeIds);
 
-    inject(dut, 1, 'idle', 'running');
+    injectD(dut, 1, 'idle', 'running', 1000);
     await _sleep(50);
-    inject(dut, 2, 'idle', 'running');
+    injectD(dut, 2, 'idle', 'running', 1000);
     await _sleep(50);
-    inject(dut, 3, 'idle', 'running');
+    injectD(dut, 3, 'idle', 'running', 1000);
     if( extra ) {
       await _sleep(250);
     }
-    inject(dut, 4, 'idle', 'failure');
+    injectD(dut, 4, 'idle', 'failure', 1000);
     if( extra ) {
       await _sleep(250);
     }
-    inject(dut, 4, 'failure', 'idle');
+    injectD(dut, 4, 'failure', 'idle', 1000);
     await _sleep(50);
     if( extra ) {
       await _sleep(250);
     }
-    inject(dut, 3, 'running', 'failure');
+    injectD(dut, 3, 'running', 'failure', 1000);
 
     console.log('bottom');
 
