@@ -155,7 +155,11 @@ endif
 
 
 
+.PHONY: bintohex
 
+bintohex:
+	hexdump t05_0.fbl > 0.txt
+	hexdump t05_1.fbl > 1.txt
 
 
 .PHONY: all build watch dev start test pretest lint jestc copydist cleandist
