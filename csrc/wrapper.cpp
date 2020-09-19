@@ -359,8 +359,13 @@ void reset_factory(void) {
 }
 
 void reset_all(void) {
-    reset_trackers();
-    reset_factory();
+    try {
+        reset_trackers();
+        reset_factory();
+    } catch (exception e) {
+        cout << "Exception (reset_all): " << e.what() << "\n";
+    }
+
 }
 
 
@@ -407,11 +412,19 @@ int parse_xml(const char* xml) {
         return 4;
     }
 
-    // pull out the node IDS into the vectors in this file
-    save_node_ids(tree);
+    try {
 
-    // write to the js callback with byte data for the log header
-    write_tree_header_to_js(tree);
+        // pull out the node IDS into the vectors in this file
+        save_node_ids(tree);
+
+        // write to the js callback with byte data for the log header
+        write_tree_header_to_js(tree);
+
+    } catch (exception e) {
+            cout << "Exception:2 " << e.what() << "\n";
+            return 5;
+        }
+
 
     return 0;
 }
