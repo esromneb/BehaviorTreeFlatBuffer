@@ -5,6 +5,7 @@
 #include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
 #include <vector>
+#include <map>
 #include <iostream>
 #include <algorithm> // for max
 
@@ -19,8 +20,8 @@ using namespace BT;
 /// File scope (static) vectors used for feeding information to js
 /// 
 static std::vector<std::string> node_names;
-static std::vector<uint32_t> node_ids;
-static std::vector<std::vector<uint32_t>> children_ids;
+static std::vector<uint16_t> node_ids;
+static std::map<uint16_t,std::vector<uint16_t>> children_ids;
 
 /// Factory
 static BT::BehaviorTreeFactory* factory = 0;
@@ -37,6 +38,11 @@ static testExternalJSMethod* gptr = 0;
 /// largest uid
 static uint16_t largestUid = 0;
 
+/// another patched variable
+/// so I can produce consistent outputs
+/// this global value (See lib/BehaviorTree.CPP/src/tree_node.cpp)
+/// tree node id's are now set using this variable (after patch is applied)
+extern uint16_t btfb_g_uid;
 
 
 
@@ -51,7 +57,7 @@ NodeStatus DummyFunction(void) {
     // This is just a convenient place/function to put
     // these to ignore unused variable warnings
     // see debug_data.hpp
-#ifdef VERBOSE_WRAPPER
+#ifdef INCLUDE_TEST_CODE_FUNCTIONS
     (void)xml_text;
     (void)xml_text2;
 #endif
@@ -90,8 +96,9 @@ extern "C" {
 void reset_trackers(void) {
     node_names.resize(0);
     node_ids.resize(0);
-    children_ids.resize(0);
+    children_ids.clear();
     largestUid = 0;
+    btfb_g_uid = 1;
 }
 
 }
@@ -111,17 +118,26 @@ void save_node_ids(const Tree &tree) {
 
         node_ids.push_back(uid);
         largestUid = std::max(largestUid, uid);
-    }
 
-    children_ids.resize(node_ids.size());
+        // this makes sure that children_ids
+        // has an (empty) vector for every single
+        // uid
+        // we can use this as a quick way in
+        // logTransition to tell if a uid is valid
+        if( children_ids.count(uid) == 0 ) {
+            children_ids[uid] = {};
+        }
+    }
 
 
     auto visitor = [](BT::TreeNode * node) {
+        const uint32_t id = (uint32_t) node->UID();
+
+
 #ifdef VERBOSE_WRAPPER
-        cout << "Node " << node->registrationName() << " has children: ";
+        cout << "Node (" << id << ") " << node->registrationName() << " has children: ";
 #endif
 
-        const uint32_t id = (uint32_t) node->UID();
 
 
         if (auto control = dynamic_cast<const BT::ControlNode*>(node))
@@ -133,9 +149,11 @@ void save_node_ids(const Tree &tree) {
 #ifdef VERBOSE_WRAPPER
                 cout << " " << cc->registrationName();
 #endif
-                children_ids[id].push_back(cc->UID());
 
-                // applyRecursiveVisitor(static_cast<const TreeNode*>(child), visitor);
+                if( children_ids.count(id) == 0 ) {
+                    children_ids[id] = {};
+                }
+                children_ids[id].push_back(cc->UID());
             }
         }
        else if (auto decorator = dynamic_cast<const BT::DecoratorNode*>(node))
@@ -146,8 +164,10 @@ void save_node_ids(const Tree &tree) {
             cout << " " << cc->registrationName();
 #endif
 
+            if( children_ids.count(id) == 0 ) {
+                children_ids[id] = {};
+            }
             children_ids[id].push_back(cc->UID());
-            // applyRecursiveVisitor(, visitor);
         }
 
 #ifdef VERBOSE_WRAPPER
@@ -190,7 +210,7 @@ bool write_fn_is_set(void) {
 }
 
 
-#ifdef VERBOSE_WRAPPER
+#ifdef INCLUDE_TEST_CODE_FUNCTIONS
 void callBoundJs(void) {
     unsigned char buf[8];
     buf[0] = 'a';
@@ -262,7 +282,8 @@ int lt(const int uid, const int prev_status, const int status) {
     const auto now = std::chrono::high_resolution_clock::now();
 
     // verify if this is a valid uid
-    if( uid > largestUid ) {
+    if( children_ids.count(uid) == 0 ) {
+        cout << "Error: UID " << uid << " is not valid\n";
         return 1;
     }
 
@@ -276,7 +297,7 @@ int lt(const int uid, const int prev_status, const int status) {
 }
 
 
-#ifdef VERBOSE_WRAPPER
+#ifdef INCLUDE_TEST_CODE_FUNCTIONS
 
 void dump_tree_nodes(const Tree &tree) {
     for( const auto& n : tree.nodes ) {

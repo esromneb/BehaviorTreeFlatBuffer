@@ -44,6 +44,11 @@ class BehaviorTreeFlatBuffer {
 
     this.bindCWrap();
 
+    this.reset();
+  }
+
+
+  reset(): void {
     // required to call as it calls new on needed objects
     this.c.reset_all();
   }

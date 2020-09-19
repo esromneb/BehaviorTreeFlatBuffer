@@ -1,4 +1,4 @@
-.PHONY: wasm all important clean patchlib
+.PHONY: wasm all important clean
 
 all: wasm
 wasm: out/btfb.wasm
@@ -110,25 +110,16 @@ out/btfb.wasm: patchlib $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
 
 
+.PHONY: patchlib patchlib1 patchlib2
 
-PTSRC=lib/BehaviorTree.CPP/src/xml_parsing.cpp
-PTPAT=patch/xml_parsing.patch
-
-
-# forward returns an error if the patch is already applied
-# reject
-# patchlibog: patch/xml_parsing.patch
-# 	patch --forward --reject-file=- $(PTSRC) < $(PTPAT)
-
-# patchlib2:
-# 	patch -p0 -N --dry-run --silent $(PTSRC) < $(PTPAT) # 2>/dev/null
-
-# patchlib3:
-# 	patch -R -p0 -s -f --dry-run $(PTSRC) < $(PTPAT)
+patchlib: patchlib1 patchlib2
 
 
+
+PTSRC1=lib/BehaviorTree.CPP/src/xml_parsing.cpp
+PTPAT1=patch/xml_parsing.patch
 # see https://stackoverflow.com/questions/7394290/how-to-check-return-value-from-the-shell-directive
-PAPPLIED := $(shell patch -R -p0 -s -f --dry-run $(PTSRC) < $(PTPAT) 1>&2 2> /dev/null > /dev/null; echo $$?)
+PAPPLIED1 := $(shell patch -R -p0 -s -f --dry-run $(PTSRC1) < $(PTPAT1) 1>&2 2> /dev/null > /dev/null; echo $$?)
 
 # patch is pretty annoying to use here
 # we would like to apply the patch, or skip if already applied exit 0
@@ -136,13 +127,35 @@ PAPPLIED := $(shell patch -R -p0 -s -f --dry-run $(PTSRC) < $(PTPAT) 1>&2 2> /de
 # then check the exit code, then run it in the forward direction if actually needed
 # we also have to do the complicated line above to deal with exit codes
 # see https://unix.stackexchange.com/questions/55780/check-if-a-file-or-folder-has-been-patched-already
-patchlib: patch/xml_parsing.patch
-ifneq ($(PAPPLIED),0)
-	@echo "$(PTSRC) is unpatched.\n"
-	patch --forward --reject-file=- $(PTSRC) < $(PTPAT)
+patchlib1: $(PTPAT1)
+ifneq ($(PAPPLIED1),0)
+	@echo "$(PTSRC1) is unpatched.\n"
+	patch --forward --reject-file=- $(PTSRC1) < $(PTPAT1)
 else
-	@echo "$(PTSRC) already patched, skipping..."
+	@echo "$(PTSRC1) already patched, skipping..."
 endif
+
+
+
+
+
+PTSRC2=lib/BehaviorTree.CPP/src/tree_node.cpp
+PTPAT2=patch/tree_node.patch
+PAPPLIED2 := $(shell patch -R -p0 -s -f --dry-run $(PTSRC2) < $(PTPAT2) 1>&2 2> /dev/null > /dev/null; echo $$?)
+
+patchlib2: $(PTPAT2)
+ifneq ($(PAPPLIED2),0)
+	@echo "$(PTSRC2) is unpatched.\n"
+	patch --forward --reject-file=- $(PTSRC2) < $(PTPAT2)
+else
+	@echo "$(PTSRC2) already patched, skipping..."
+endif
+
+
+
+
+
+
 
 .PHONY: all build watch dev start test pretest lint jestc copydist cleandist
 .PHONY: test

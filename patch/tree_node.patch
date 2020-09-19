@@ -1,0 +1,8 @@
+16a17,18
+> uint16_t btfb_g_uid = 1;
+> 
+21,22c23
+<     static uint16_t uid = 1;
+<     return uid++;
+---
+>     return btfb_g_uid++;
