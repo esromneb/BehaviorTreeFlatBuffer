@@ -28,6 +28,13 @@ npm publish
 cd lib/BehaviorTree.CPP/src
 diff xml_parsing.cpp xml_parsing2.cpp > ../../../patch/xml_parsing.patch
 ```
+or
+```bash
+cd lib/BehaviorTree.CPP/src
+cp tree_node.cpp tree_node2.cpp
+git checkout tree_node.cpp
+diff tree_node.cpp tree_node2.cpp > ../../../patch/tree_node.patch
+```
 
 
 # See Also Emscripten
