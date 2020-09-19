@@ -117,11 +117,13 @@ void save_node_ids(const Tree &tree) {
 
 
     auto visitor = [](BT::TreeNode * node) {
+        const uint32_t id = (uint32_t) node->UID();
+
+
 #ifdef VERBOSE_WRAPPER
-        cout << "Node " << node->registrationName() << " has children: ";
+        cout << "Node (" << id << ") " << node->registrationName() << " has children: ";
 #endif
 
-        const uint32_t id = (uint32_t) node->UID();
 
 
         if (auto control = dynamic_cast<const BT::ControlNode*>(node))
