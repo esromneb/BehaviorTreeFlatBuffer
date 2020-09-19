@@ -157,6 +157,9 @@ endif
 
 .PHONY: bintohex
 
+cleanhex:
+	rm -rf t05_0.fbl t05_1.fbl 0.txt 1.txt
+
 bintohex:
 	hexdump t05_0.fbl > 0.txt
 	hexdump t05_1.fbl > 1.txt
