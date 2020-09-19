@@ -23,7 +23,7 @@ static std::vector<uint32_t> node_ids;
 static std::vector<std::vector<uint32_t>> children_ids;
 
 /// Factory
-static BT::BehaviorTreeFactory factory;
+static BT::BehaviorTreeFactory* factory = 0;
 
 /// Used in timing
 static std::chrono::steady_clock::time_point parse_time;
@@ -85,15 +85,24 @@ void register_functions(BehaviorTreeFactory& factory) {
 //     }
 // }
 
+extern "C" {
+
+void reset_trackers(void) {
+    node_names.resize(0);
+    node_ids.resize(0);
+    children_ids.resize(0);
+    largestUid = 0;
+}
+
+}
 
 /// Saves tree node names, ids, and children to
 /// the static vectors
 void save_node_ids(const Tree &tree) {
     // size_t i = 0;
 
-    node_names.resize(0);
-    node_ids.resize(0);
-    children_ids.resize(0);
+    reset_trackers();
+
     for( const auto& n : tree.nodes ) {
 //         cout << n->registrationName() << "->" << n->UID() << "\n";
         node_names.push_back(n->registrationName());
@@ -307,16 +316,32 @@ void debug_example(void) {
 
 // pass an action or condition node name
 void unregister_builder(const char* name) {
-    factory.unregisterBuilder(name);
+    factory->unregisterBuilder(name);
 }
 
 void register_action_node(const char* name) {
-    factory.registerSimpleAction(name, std::bind(DummyFunction));
+    factory->registerSimpleAction(name, std::bind(DummyFunction));
 }
 
 void register_condition_node(const char* name) {
-    factory.registerSimpleCondition(name, std::bind(DummyFunction));
+    factory->registerSimpleCondition(name, std::bind(DummyFunction));
 }
+
+void reset_factory(void) {
+
+    if( factory != 0 ) {
+        delete factory;
+        factory = 0;
+    }
+
+    factory = new BehaviorTreeFactory();
+}
+
+void reset_all(void) {
+    reset_trackers();
+    reset_factory();
+}
+
 
 ///
 /// Main entry point
@@ -345,10 +370,12 @@ int parse_xml(const char* xml) {
     }
 
 
+
+
     Tree tree;
     try {
         // parse BehaviorTree
-        tree = factory.createTreeFromText(xml);
+        tree = factory->createTreeFromText(xml);
     } catch (BehaviorTreeException e) {
         cout << "Exception: " << e.what() << "\n";
         return 3;

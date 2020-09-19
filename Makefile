@@ -60,6 +60,9 @@ EXPORT_STRING = \
 "_unregister_builder", \
 "_parse_xml", \
 "_lt", \
+"_reset_trackers", \
+"_reset_factory", \
+"_reset_all", \
 
 # Functions used in debugging
 # "_callBoundJs", \

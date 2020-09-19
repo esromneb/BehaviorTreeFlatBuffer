@@ -43,6 +43,9 @@ class BehaviorTreeFlatBuffer {
 
 
     this.bindCWrap();
+
+    // required to call as it calls new on needed objects
+    this.c.reset_all();
   }
 
   // writeBufferContainer: {buf: Uint8Array};
@@ -259,6 +262,9 @@ class BehaviorTreeFlatBuffer {
     c.register_condition_node  = w('register_condition_node', 'void', ['string']);
     c.unregister_builder       = w('unregister_builder',      'void', ['string']);
     c.parse_xml                = w('parse_xml',               'number', ['string']);
+    c.reset_factory            = w('reset_factory',           'void', ['void']);
+    c.reset_all                = w('reset_all',               'void', ['void']);
+    c.reset_trackers           = w('reset_trackers',          'void', ['void']);
   }
 
   parseXML(xml: string): void {
