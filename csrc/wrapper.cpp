@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <iostream>
+#include <algorithm> // for max
 
 using namespace std;
 using namespace BT;
@@ -33,6 +34,8 @@ typedef void testExternalJSMethod(const unsigned char* const data, const size_t 
 /// function pointer for c->js
 static testExternalJSMethod* gptr = 0;
 
+/// largest uid
+static uint16_t largestUid = 0;
 
 
 
@@ -94,8 +97,11 @@ void save_node_ids(const Tree &tree) {
     for( const auto& n : tree.nodes ) {
 //         cout << n->registrationName() << "->" << n->UID() << "\n";
         node_names.push_back(n->registrationName());
-        node_ids.push_back(n->UID());
-        // i++;
+
+        const auto uid = n->UID();
+
+        node_ids.push_back(uid);
+        largestUid = std::max(largestUid, uid);
     }
 
     children_ids.resize(node_ids.size());
@@ -241,15 +247,23 @@ void write_tree_header_to_js(const Tree &tree) {
 
 extern "C" {
 
-
-void lt(const int uid, const int prev_status, const int status) {
+// returns 0 for success
+int lt(const int uid, const int prev_status, const int status) {
+    // grab now asap
     const auto now = std::chrono::high_resolution_clock::now();
+
+    // verify if this is a valid uid
+    if( uid > largestUid ) {
+        return 1;
+    }
+
     const auto duration = now-parse_time;
 
     SerializedTransition buffer =
         SerializeTransition(uid, duration, (NodeStatus)prev_status, (NodeStatus)status);
     
     writeToJs(reinterpret_cast<const unsigned char*>(buffer.data()), buffer.size());
+    return 0;
 }
 
 

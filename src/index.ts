@@ -6,6 +6,20 @@ function _waitForStart(mod): Promise<void> {
   });
 }
 
+function _catbuf(resultConstructor, ...arrays) {
+    let totalLength = 0;
+    for (const arr of arrays) {
+        totalLength += arr.length;
+    }
+    const result = new resultConstructor(totalLength);
+    let offset = 0;
+    for (const arr of arrays) {
+        result.set(arr, offset);
+        offset += arr.length;
+    }
+    return result;
+}
+
 
 class BehaviorTreeFlatBuffer {
   wasm: any;
@@ -31,6 +45,61 @@ class BehaviorTreeFlatBuffer {
     this.bindCWrap();
   }
 
+  // writeBufferContainer: {buf: Uint8Array};
+
+  internalBuffer: Uint8Array;
+
+  writeToBuffer(): void {
+    // this.writeBufferContainer = o;
+
+    this.internalBuffer = Uint8Array.of();
+
+    this.bindBufferWriter();
+  }
+
+  getInternalBuffer(): Uint8Array {
+    return this.internalBuffer;
+  }
+
+
+  private bindBufferWriter(): void {
+
+    const wasm = this.wasm;
+    const that = this;
+
+    // example of grabbing byte array directly from wasm memory
+    this.boundFnPtr = wasm.addFunction(function(ptr, sz) {
+
+
+      if(that.logWrites) {
+        console.log(`in js bindBufferWriter ${ptr} ${sz}`);
+      }
+
+      var myCharArray: Uint8Array = wasm.HEAPU8.subarray(ptr, ptr+sz);
+
+      
+      that.internalBuffer = _catbuf(Uint8Array, that.internalBuffer, myCharArray);
+      // console.log(that.internalBuffer);
+
+    }, 'vii');
+
+
+    let passFn = wasm.cwrap('pass_write_fn', 'void', ['number']);
+
+    passFn(this.boundFnPtr);
+
+  }
+
+
+
+
+
+
+
+
+
+
+
   filePath: string|undefined = undefined;
   fd: number|undefined = undefined;
 
@@ -52,9 +121,6 @@ class BehaviorTreeFlatBuffer {
           resolve();
       });
     });
-
-    
-
   }
 
 
@@ -138,7 +204,7 @@ class BehaviorTreeFlatBuffer {
       console.log(`in js function2 ${ptr} ${sz}`);
     }
 
-      var myCharArray = wasm.HEAPU8.subarray(ptr, ptr+sz);
+      var myCharArray: Uint8Array = wasm.HEAPU8.subarray(ptr, ptr+sz);
 
       if( that.fd == undefined ) {
         console.log("Error: bindFileWriter requires fd to be set ");
@@ -188,7 +254,7 @@ class BehaviorTreeFlatBuffer {
     c.get_saved_node_id        = w('get_saved_node_id',       'number', ['number']);
     c.get_child_node_count     = w('get_child_node_count',    'number', ['number']);
     c.get_child_node_id        = w('get_child_node_id',       'number', ['number','number']);
-    c.lt                       = w('lt',                      'void', ['number','number','number']);
+    c.lt                       = w('lt',                      'number', ['number','number','number']);
     c.register_action_node     = w('register_action_node',    'void', ['string']);
     c.register_condition_node  = w('register_condition_node', 'void', ['string']);
     c.unregister_builder       = w('unregister_builder',      'void', ['string']);
@@ -218,7 +284,10 @@ class BehaviorTreeFlatBuffer {
   }
 
   logTransition(uid: number, prev_status: number, status: number): void {
-    this.c.lt(uid, prev_status, status);
+    const ret = this.c.lt(uid, prev_status, status);
+    if( ret !== 0 ) {
+      throw new Error(`lt() c function returned error: ${ret}`);
+    }
   }
 
   testAnything(): number {

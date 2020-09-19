@@ -230,6 +230,12 @@ test.skip("write any xml to file via c", async function(done) {
             // <Action ID="PassThroughDoor"/>
             // <Action ID="PassThroughWindow"/>
 
+  const outputPath = './t05.fbl';
+
+  try {
+    fs.unlinkSync(outputPath);
+  } catch(e) {}
+
   const actionNodes = [
     'CloseDoor',
     'OpenDoor',
@@ -246,12 +252,14 @@ test.skip("write any xml to file via c", async function(done) {
 
   await dut.start();
 
-  await dut.setFilePath('./node2.fbl');
+  await dut.setFilePath(outputPath);
 
   dut.registerActionNodes(actionNodes);
   dut.registerConditionNodes(conditionNodes);
 
   dut.parseXML(t05);
+
+  console.log(dut.treeNodeIds);
 
   inject(dut, 1, 'idle', 'running');
   await _sleep(50);
@@ -272,7 +280,7 @@ test.skip("write any xml to file via c", async function(done) {
 });
 
 
-test("testtree14 to fbl", async function(done) {
+test.skip("testtree14 to fbl", async function(done) {
   
   const outputPath = './node14.fbl';
 
@@ -298,6 +306,8 @@ test("testtree14 to fbl", async function(done) {
 
   const dut = new BehaviorTreeFlatBuffer();
 
+  dut.logWrites = true;
+
   await dut.start();
 
   await dut.setFilePath(outputPath);
@@ -307,7 +317,13 @@ test("testtree14 to fbl", async function(done) {
 
   dut.parseXML(testTree14);
 
+  console.log(dut.treeNodeIds);
+
   inject(dut, 1, 'idle', 'running');
+  // inject(dut, 2, 'idle', 'idle');
+  // inject(dut, 1, 'idle', 'success');
+  // inject(dut, 1, 'idle', 'success');
+  // inject(dut, 2, 'idle', 'success');
   await _sleep(50);
   // inject(dut, 2, 'idle', 'running');
   // await _sleep(50);
@@ -324,5 +340,83 @@ test("testtree14 to fbl", async function(done) {
 
   done();
 });
+
+
+
+
+test("testtree14 to buffer", async function(done) {
+  
+  const outputPath = './node14.fbl';
+
+  try {
+    fs.unlinkSync(outputPath);
+  } catch(e) {}
+
+  const actionNodes = [
+    'inOnlyA',
+    'inOnlyB',
+    'outOnlyA',
+    'outOnlyB',
+    'outOnlyC',
+    'outOnlyD',
+    'outOnlyE',
+    'outOnlyF',
+    ];
+
+  const conditionNodes = [
+    'IsDoorOpen',
+  ];
+
+
+  const dut = new BehaviorTreeFlatBuffer();
+
+  // dut.logWrites = true;
+
+  // let buf = Uint8Array.of();
+
+  // console.log(buf);
+
+  await dut.start();
+
+  dut.writeToBuffer();
+
+  dut.registerActionNodes(actionNodes);
+  dut.registerConditionNodes(conditionNodes);
+
+  dut.parseXML(testTree14);
+
+  console.log(dut.treeNodeIds);
+
+  inject(dut, 1, 'idle', 'running');
+  // inject(dut, 2, 'idle', 'idle');
+  // inject(dut, 1, 'idle', 'success');
+  // inject(dut, 1, 'idle', 'success');
+  // inject(dut, 2, 'idle', 'success');
+  await _sleep(50);
+  // inject(dut, 2, 'idle', 'running');
+  // await _sleep(50);
+  // inject(dut, 3, 'idle', 'running');
+  // inject(dut, 4, 'idle', 'failure');
+  // inject(dut, 4, 'failure', 'idle');
+  // await _sleep(50);
+  // inject(dut, 3, 'running', 'failure');
+
+  // console.log('------------------');
+  // console.log(dut.getInternalBuffer());
+
+  // console.log(dut.treeNodeIds);
+  // console.log(dut.children);
+
+  let b0 = Uint8Array.of(1,2,5);
+  let b1 = Uint8Array.of(1,2);
+
+  console.log(Buffer.compare(b0,b1));
+
+
+
+
+  done();
+});
+
 
 
