@@ -219,7 +219,7 @@ inject(dut, 1, 'success', 'idle');
 });
 
 
-test.skip("write any xml to file via c", async function(done) {
+test("write any xml to file via c", async function(done) {
   
   // step 1 write nodes
 
@@ -344,7 +344,7 @@ test.skip("testtree14 to fbl", async function(done) {
 
 
 
-test("testtree14 to buffer", async function(done) {
+test.skip("testtree14 to buffer", async function(done) {
   
   const outputPath = './node14.fbl';
 
