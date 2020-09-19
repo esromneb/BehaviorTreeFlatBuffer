@@ -385,27 +385,11 @@ test.skip("testtree14 to buffer", async function(done) {
 
   dut.parseXML(testTree14);
 
-  console.log(dut.treeNodeIds);
+  // console.log(dut.treeNodeIds);
 
   inject(dut, 1, 'idle', 'running');
-  // inject(dut, 2, 'idle', 'idle');
-  // inject(dut, 1, 'idle', 'success');
-  // inject(dut, 1, 'idle', 'success');
-  // inject(dut, 2, 'idle', 'success');
   await _sleep(50);
-  // inject(dut, 2, 'idle', 'running');
-  // await _sleep(50);
-  // inject(dut, 3, 'idle', 'running');
-  // inject(dut, 4, 'idle', 'failure');
-  // inject(dut, 4, 'failure', 'idle');
-  // await _sleep(50);
-  // inject(dut, 3, 'running', 'failure');
 
-  // console.log('------------------');
-  // console.log(dut.getInternalBuffer());
-
-  // console.log(dut.treeNodeIds);
-  // console.log(dut.children);
 
   let b0 = Uint8Array.of(1,2,5);
   let b1 = Uint8Array.of(1,2);
