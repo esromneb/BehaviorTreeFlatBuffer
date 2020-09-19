@@ -51,7 +51,7 @@ NodeStatus DummyFunction(void) {
     // This is just a convenient place/function to put
     // these to ignore unused variable warnings
     // see debug_data.hpp
-#ifdef VERBOSE_WRAPPER
+#ifdef INCLUDE_TEST_CODE_FUNCTIONS
     (void)xml_text;
     (void)xml_text2;
 #endif
@@ -190,7 +190,7 @@ bool write_fn_is_set(void) {
 }
 
 
-#ifdef VERBOSE_WRAPPER
+#ifdef INCLUDE_TEST_CODE_FUNCTIONS
 void callBoundJs(void) {
     unsigned char buf[8];
     buf[0] = 'a';
@@ -276,7 +276,7 @@ int lt(const int uid, const int prev_status, const int status) {
 }
 
 
-#ifdef VERBOSE_WRAPPER
+#ifdef INCLUDE_TEST_CODE_FUNCTIONSv
 
 void dump_tree_nodes(const Tree &tree) {
     for( const auto& n : tree.nodes ) {
@@ -329,17 +329,29 @@ void register_condition_node(const char* name) {
 
 void reset_factory(void) {
 
+    cout << "AAAAAA\n";
     if( factory != 0 ) {
+        cout << "BBBBBBB\n";
         delete factory;
+        cout << "CCCCCCC\n";
         factory = 0;
     }
+    cout << "DDDDDDD\n";
 
     factory = new BehaviorTreeFactory();
+
+    cout << "EEEEEEE\n";
 }
 
 void reset_all(void) {
+try {
     reset_trackers();
     reset_factory();
+} catch (BehaviorTreeException e) {
+        cout << "Exception (reset_all): " << e.what() << "\n";
+
+    }
+
 }
 
 

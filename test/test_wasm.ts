@@ -219,7 +219,7 @@ inject(dut, 1, 'success', 'idle');
 });
 
 
-test("write any xml to file via c", async function(done) {
+test.skip("write any xml to file via c", async function(done) {
   
   // step 1 write nodes
 
@@ -278,6 +278,86 @@ test("write any xml to file via c", async function(done) {
 
   done();
 });
+
+
+
+
+
+test("write same xml twice to file", async function(done) {
+  
+  const outputPaths = ['./t05_0.fbl', './t05_1.fbl'];
+
+  try {
+    fs.unlinkSync(outputPaths[0]);
+    fs.unlinkSync(outputPaths[1]);
+  } catch(e) {}
+
+  const actionNodes = [
+    'CloseDoor',
+    'OpenDoor',
+    'PassThroughDoor',
+    'PassThroughWindow',
+  ];
+
+  const conditionNodes = [
+    'IsDoorOpen',
+  ];
+
+
+  const dut = new BehaviorTreeFlatBuffer();
+  await dut.start();
+
+  for(let i = 0; i < 2; i++) {
+
+    console.log('RRRRRRRRRRRRRRRRRRRRReset');
+    await _sleep(100);
+
+    dut.reset();
+
+    const extra = i === 1;
+
+    const outputPath = outputPaths[i];
+
+    await dut.setFilePath(outputPath);
+
+    dut.registerActionNodes(actionNodes);
+    dut.registerConditionNodes(conditionNodes);
+
+    dut.parseXML(t05);
+
+    // console.log(dut.treeNodeIds);
+
+    inject(dut, 1, 'idle', 'running');
+    await _sleep(50);
+    inject(dut, 2, 'idle', 'running');
+    await _sleep(50);
+    inject(dut, 3, 'idle', 'running');
+    if( extra ) {
+      await _sleep(250);
+    }
+    inject(dut, 4, 'idle', 'failure');
+    if( extra ) {
+      await _sleep(250);
+    }
+    inject(dut, 4, 'failure', 'idle');
+    await _sleep(50);
+    if( extra ) {
+      await _sleep(250);
+    }
+    inject(dut, 3, 'running', 'failure');
+
+    console.log('bottom');
+
+  }
+
+  // console.log(dut.treeNodeIds);
+  // console.log(dut.children);
+
+
+  done();
+});
+
+
 
 
 test.skip("testtree14 to fbl", async function(done) {
