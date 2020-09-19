@@ -5,6 +5,7 @@
 #include "behaviortree_cpp_v3/flatbuffers/bt_flatbuffer_helper.h"
 
 #include <vector>
+#include <map>
 #include <iostream>
 #include <algorithm> // for max
 
@@ -19,8 +20,9 @@ using namespace BT;
 /// File scope (static) vectors used for feeding information to js
 /// 
 static std::vector<std::string> node_names;
-static std::vector<uint32_t> node_ids;
-static std::vector<std::vector<uint32_t>> children_ids;
+static std::vector<uint16_t> node_ids;
+// static std::vector<std::vector<uint16_t>> children_ids;
+static std::map<uint16_t,std::vector<uint16_t>> children_ids;
 
 /// Factory
 static BT::BehaviorTreeFactory* factory = 0;
@@ -90,7 +92,7 @@ extern "C" {
 void reset_trackers(void) {
     node_names.resize(0);
     node_ids.resize(0);
-    children_ids.resize(0);
+    children_ids.clear();
     largestUid = 0;
 }
 
@@ -111,9 +113,18 @@ void save_node_ids(const Tree &tree) {
 
         node_ids.push_back(uid);
         largestUid = std::max(largestUid, uid);
+
+        // this makes sure that children_ids
+        // has an (empty) vector for every single
+        // uid
+        // we can use this as a quick way in
+        // logTransition to tell if a uid is valid
+        if( children_ids.count(uid) == 0 ) {
+            children_ids[uid] = {};
+        }
     }
 
-    children_ids.resize(node_ids.size());
+    // children_ids.resize(node_ids.size());
 
 
     auto visitor = [](BT::TreeNode * node) {
@@ -135,9 +146,11 @@ void save_node_ids(const Tree &tree) {
 #ifdef VERBOSE_WRAPPER
                 cout << " " << cc->registrationName();
 #endif
-                children_ids[id].push_back(cc->UID());
 
-                // applyRecursiveVisitor(static_cast<const TreeNode*>(child), visitor);
+                if( children_ids.count(id) == 0 ) {
+                    children_ids[id] = {};
+                }
+                children_ids[id].push_back(cc->UID());
             }
         }
        else if (auto decorator = dynamic_cast<const BT::DecoratorNode*>(node))
@@ -148,8 +161,10 @@ void save_node_ids(const Tree &tree) {
             cout << " " << cc->registrationName();
 #endif
 
+            if( children_ids.count(id) == 0 ) {
+                children_ids[id] = {};
+            }
             children_ids[id].push_back(cc->UID());
-            // applyRecursiveVisitor(, visitor);
         }
 
 #ifdef VERBOSE_WRAPPER
@@ -176,11 +191,13 @@ uint32_t get_saved_node_id(const uint32_t i) {
 }
 
 uint32_t get_child_node_count(const uint32_t i) {
-    return children_ids[i].size();
+    return 0;
+    // return children_ids[i].size();
 }
 
 uint32_t get_child_node_id(const uint32_t i, const uint32_t j) {
-    return children_ids[i][j];
+    return 0;
+    // return children_ids[i][j];
 }
 
 void pass_write_fn(int ptr) {
@@ -264,8 +281,15 @@ int lt(const int uid, const int prev_status, const int status) {
     const auto now = std::chrono::high_resolution_clock::now();
 
     // verify if this is a valid uid
-    if( uid > largestUid ) {
+    // if( uid > largestUid ) {
+    //     return 1;
+    // }
+
+
+    if( children_ids.count(uid) == 0 ) {
+        cout << "Error: UID " << uid << " is not valid\n";
         return 1;
+    //     children_ids[id] = {};
     }
 
     const auto duration = now-parse_time;
