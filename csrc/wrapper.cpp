@@ -39,6 +39,11 @@ static testExternalJSMethod* gptr = 0;
 /// largest uid
 static uint16_t largestUid = 0;
 
+/// another patched variable
+/// so I can produce consistent outputs
+/// this global value (See lib/BehaviorTree.CPP/src/tree_node.cpp)
+/// tree node id's are now set using this variable (after patch is applied)
+extern uint16_t btfb_g_uid;
 
 
 
@@ -94,6 +99,7 @@ void reset_trackers(void) {
     node_ids.resize(0);
     children_ids.clear();
     largestUid = 0;
+    btfb_g_uid = 1;
 }
 
 }
