@@ -31,7 +31,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  console.log("reset");
+  // console.log("reset");
   dut.reset();
 });
 

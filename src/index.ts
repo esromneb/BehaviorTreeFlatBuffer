@@ -35,16 +35,23 @@ class BehaviorTreeFlatBuffer {
     this.wasm = require('../out/btfb.js');
   }
 
+  startCalled: boolean = false;
+
   async start(): Promise<void> {
-    if( this.logStartup ) {
-      console.log('start');
+    if( !this.startCalled ) {
+      
+      if( this.logStartup ) {
+        console.log('start');
+      }
+      await _waitForStart(this.wasm);
+
+
+      this.bindCWrap();
     }
-    await _waitForStart(this.wasm);
-
-
-    this.bindCWrap();
 
     this.reset();
+
+    this.startCalled = true;
   }
 
 
