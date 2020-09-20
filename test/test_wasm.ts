@@ -1,7 +1,9 @@
 const t05 = require("./btrees/t05.xml");
 const testTree14 = require("./btrees/testTree14.xml");
+const testTree5 = require("./btrees/testTree5.xml");
 const fs = require('fs');
 
+import {BehaviorTreeFlatBuffer} from '../src/index'
 
 function waitForStart(mod): Promise<void> {
   return new Promise((resolve, reject)=>{
@@ -12,6 +14,29 @@ function waitForStart(mod): Promise<void> {
 async function _sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+
+
+// global single instance of this
+let dut;
+
+// can return a promise, but doesn't have to
+beforeAll(() => {
+  console.log("build");
+  dut = new BehaviorTreeFlatBuffer();
+
+  return dut.start();
+
+  // return initializeCityDatabase();
+});
+
+beforeEach(() => {
+  console.log("reset");
+  dut.reset();
+});
+
+
+
 
 
 
@@ -53,7 +78,6 @@ test.skip("test wasm full", async function(done) {
 });
 
 
-import {BehaviorTreeFlatBuffer} from '../src/index'
 
 
 test.skip("test cooked xml", async function(done) {
@@ -92,30 +116,6 @@ test.skip("test call js fn from c", async function(done) {
   done();
 });
 
-
-
-test.skip("write file with ascii", async function(done) {
-
-  const dut = new BehaviorTreeFlatBuffer();
-
-  await dut.start();
-
-  await dut.setFilePath('./node.fbl');
-
-  let b0 = new Buffer('a');
-  let b1 = new Buffer('b');
-
-
-  await dut._write(b0);
-  await dut._write(b1);
-  // expect(dut.testAnything()).toBe(3);
-
-  // dut.debugExample();
-
-  // dut.extractNodeIds();
-  
-  done();
-});
 
 
 function inject(dut, id, p: string, n: string): void {
@@ -230,7 +230,7 @@ inject(dut, 1, 'success', 'idle');
 });
 
 
-test.skip("write any xml to file via c", async function(done) {
+test("write any xml to file via c", async function(done) {
   
   // step 1 write nodes
 
@@ -259,9 +259,9 @@ test.skip("write any xml to file via c", async function(done) {
   ];
 
 
-  const dut = new BehaviorTreeFlatBuffer();
+  // const dut = new BehaviorTreeFlatBuffer();
 
-  await dut.start();
+  // await dut.start();
 
   await dut.setFilePath(outputPath);
 
@@ -270,7 +270,7 @@ test.skip("write any xml to file via c", async function(done) {
 
   dut.parseXML(t05);
 
-  console.log(dut.treeNodeIds);
+  // console.log(dut.treeNodeIds);
 
   inject(dut, 1, 'idle', 'running');
   await _sleep(50);
@@ -315,8 +315,8 @@ test("write same xml twice to file", async function(done) {
   ];
 
 
-  const dut = new BehaviorTreeFlatBuffer();
-  await dut.start();
+  // const dut = new BehaviorTreeFlatBuffer();
+  // await dut.start();
 
   for(let i = 0; i < 2; i++) {
 
@@ -370,13 +370,63 @@ test("write same xml twice to file", async function(done) {
 
 
 
+test("test tree id extraction", async function(done) {
+  
+  const outputPath = './testTree5.fbl';
+
+
+  try {
+    fs.unlinkSync(outputPath);
+  } catch(e) {}
+
+  const actionNodes = [
+    'go1',
+    'go2',
+    'go3',
+    'stay1',
+    'stay2',
+  ];
+
+
+
+  // const dut = new BehaviorTreeFlatBuffer();
+  // await dut.start();
+
+  await dut.setFilePath(outputPath);
+
+  dut.registerActionNodes(actionNodes);
+
+  dut.parseXML(testTree5);
+
+  // console.log(dut.children);
+  // console.log(dut.treeNodeIds);
+
+  let got;
+  // got = dut.getUIDforPathArray([0,0]);
+  got = dut.getForPathArray([0,1,1]);
+  // console.log(got);
+            // getUIDForPath       
+  expect(dut.getNameForUID(dut.getForPath('0.1.1'))).toBe('stay2');
+
+
+  expect(dut.getNameForUID(dut.getForPath('0'))).toBe('Sequence');
+
+  expect(dut.getNameForUID(dut.getForPath('0.1.2.0'))).toBe('go1');
+  expect(dut.getNameForUID(dut.getForPath('0.1.2.1'))).toBe('go2');
+  expect(dut.getNameForUID(dut.getForPath('0.1.2.2'))).toBe('go3');
+  // console.log(got);
+
+
+  done();
+
+});
 
 
 
 
 
 
-test.skip("write large time stamps xml twice to file", async function(done) {
+test("write large time stamps xml twice to file", async function(done) {
   
   const outputPaths = ['./large_stamp.fbl'];
 
@@ -396,10 +446,10 @@ test.skip("write large time stamps xml twice to file", async function(done) {
   ];
 
 
-  const dut = new BehaviorTreeFlatBuffer();
-  await dut.start();
+  // const dut = new BehaviorTreeFlatBuffer();
+  // await dut.start();
 
-  dut.reset();
+  // dut.reset();
 
   const outputPath = outputPaths[0];
 

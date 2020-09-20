@@ -131,11 +131,11 @@ class BehaviorTreeFlatBuffer {
     });
   }
 
-  _writeSync(buffer: Uint8Array): void {
+  private _writeSync(buffer: Uint8Array): void {
     fs.writeSync(this.fd, buffer, 0, buffer.length, null);
   }
 
-  _write(buffer: Uint8Array): Promise<void> {
+  private _write(buffer: Uint8Array): Promise<void> {
 
     const that = this;
 
@@ -371,6 +371,44 @@ class BehaviorTreeFlatBuffer {
     }
 
     return ret;
+  }
+
+
+  getNameForUID(u: number): string {
+    return this.treeNodeIds[u];
+  }
+
+
+  // get UID by path
+  getForPath(path: string): number {
+    const ps = path.split('.').map(x=>parseInt(x,10));
+    return this.getForPathArray(ps);
+  }
+
+  // get UID by path array
+  getForPathArray(ps: number[]): number {
+
+    // due to our patching of BehaviorTree.CPP, the first node is always 1
+    const base = 1;
+
+
+    if( ps[0] != 0 ) {
+      throw new Error("Path starting at a number other than 0 is not valid");
+    }
+
+    let lut = base;
+
+    const c = this.children;
+
+    // j is the position in the path
+    // i is the path value
+    for(let j = 1; j < ps.length; j++) {
+      const i = ps[j];
+
+      lut = c[lut][i];
+    }
+
+    return lut;
   }
 
 }
