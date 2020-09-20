@@ -338,24 +338,24 @@ test("write same xml twice to file", async function(done) {
 
     // console.log(dut.treeNodeIds);
 
-    injectD(dut, 1, 'idle', 'running', 1000);
+    injectD(dut, 1, 'idle', 'running', 0);
     // await _sleep(50);
     injectD(dut, 2, 'idle', 'running', 1000);
     // await _sleep(50);
-    injectD(dut, 3, 'idle', 'running', 1000);
+    injectD(dut, 3, 'idle', 'running', 2000);
     // if( extra ) {
     //   await _sleep(250);
     // }
-    injectD(dut, 4, 'idle', 'failure', 1000);
+    injectD(dut, 4, 'idle', 'failure', 3000);
     // if( extra ) {
     //   await _sleep(250);
     // }
-    injectD(dut, 4, 'failure', 'idle', 1000);
+    injectD(dut, 4, 'failure', 'idle', 4000);
     // await _sleep(50);
     // if( extra ) {
     //   await _sleep(250);
     // }
-    injectD(dut, 3, 'running', 'failure', 1000);
+    injectD(dut, 3, 'running', 'failure', 5000);
 
     // console.log('bottom');
 
@@ -367,6 +367,70 @@ test("write same xml twice to file", async function(done) {
 
   done();
 });
+
+
+
+
+
+
+
+
+
+test.skip("write large time stamps xml twice to file", async function(done) {
+  
+  const outputPaths = ['./large_stamp.fbl'];
+
+  try {
+    fs.unlinkSync(outputPaths[0]);
+  } catch(e) {}
+
+  const actionNodes = [
+    'CloseDoor',
+    'OpenDoor',
+    'PassThroughDoor',
+    'PassThroughWindow',
+  ];
+
+  const conditionNodes = [
+    'IsDoorOpen',
+  ];
+
+
+  const dut = new BehaviorTreeFlatBuffer();
+  await dut.start();
+
+  dut.reset();
+
+  const outputPath = outputPaths[0];
+
+  await dut.setFilePath(outputPath);
+
+  dut.registerActionNodes(actionNodes);
+  dut.registerConditionNodes(conditionNodes);
+
+  dut.parseXML(t05);
+
+  // console.log(dut.treeNodeIds);
+
+  injectD(dut, 1, 'idle', 'running', 0);
+  injectD(dut, 2, 'idle', 'running', 1000);
+  injectD(dut, 3, 'idle', 'running', 1010);
+  injectD(dut, 4, 'idle', 'failure', 2000);
+  injectD(dut, 4, 'failure', 'idle', 3000);
+  injectD(dut, 3, 'running', 'failure', 4000);
+  injectD(dut, 3, 'running', 'failure', 40000);
+  injectD(dut, 3, 'running', 'failure', 400000);
+  injectD(dut, 3, 'running', 'failure', 4000000);
+  injectD(dut, 3, 'running', 'failure', 40000000);
+  injectD(dut, 3, 'running', 'failure', 400000000);
+  injectD(dut, 3, 'running', 'failure', 4000000000);
+  injectD(dut, 3, 'running', 'failure', 40000000000);
+
+
+
+  done();
+});
+
 
 
 
