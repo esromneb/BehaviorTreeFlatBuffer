@@ -155,7 +155,7 @@ endif
 
 
 
-.PHONY: bintohex
+.PHONY: bintohex cleanhex
 
 cleanhex:
 	rm -rf t05_0.fbl t05_1.fbl 0.txt 1.txt
