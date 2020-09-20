@@ -131,8 +131,11 @@ class BehaviorTreeFlatBuffer {
     });
   }
 
+  _writeSync(buffer: Uint8Array): void {
+    fs.writeSync(this.fd, buffer, 0, buffer.length, null);
+  }
 
-  _write(buffer: any): Promise<void> {
+  _write(buffer: Uint8Array): Promise<void> {
 
     const that = this;
 
@@ -219,7 +222,7 @@ class BehaviorTreeFlatBuffer {
         return;
       }
 
-      that._write(myCharArray);
+      that._writeSync(myCharArray);
       
       if(that.logWrites) {
         console.log(myCharArray);
