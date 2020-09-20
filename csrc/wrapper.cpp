@@ -255,17 +255,26 @@ void write_tree_header_to_js(const Tree &tree) {
 
     // //-------------------------------------
 
+
+    const auto sz = static_cast<int32_t>(builder.GetSize());
+
+    // cout << "write_tree_header_to_js: sz: " << sz << "\n";
+
     // file_os_.open(filename, std::ofstream::binary | std::ofstream::out);
 
     // // serialize the length of the buffer in the first 4 bytes
     unsigned char size_buff[4];
-    flatbuffers::WriteScalar(size_buff, static_cast<int32_t>(builder.GetSize()));
+    flatbuffers::WriteScalar(size_buff, sz);
+
+    // for(int i = 0; i < 4; i++) {
+    //     cout << "    " << i << ": " << (int)size_buff[i] << "\n";
+    // }
 
     // myPrintWrite(size_buff, 4);
     // myPrintWrite(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), builder.GetSize());
 
     writeToJs(size_buff, 4);
-    writeToJs(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), builder.GetSize());
+    writeToJs(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), sz);
 
     // file_os_.write(size_buff, 4);
     // file_os_.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
