@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer.svg?branch=master)](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer)
+[![Build Status](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer.svg?branch=master)](https://travis-ci.com/esromneb/BehaviorTreeFlatBuffer) [![npm version](https://badge.fury.io/js/behavior-tree-flat-buffer.svg)](https://badge.fury.io/js/behavior-tree-flat-buffer)
 # BehaviorTreeFlatBuffer
 A wrapper for [BehaviorTree.CPP](https://github.com/BehaviorTree/BehaviorTree.CPP) for the purpose of writing FlatBuffers.  Pass a javascript callback and a valid [Groot](https://github.com/BehaviorTree/Groot) xml file.  A log in FlatBuffer format will be written via the callback in Int8Array Buffers.
 
