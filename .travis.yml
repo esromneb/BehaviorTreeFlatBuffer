@@ -15,7 +15,7 @@ before_install:
   - git clone https://github.com/zeromq/libzmq.git
   - cd libzmq
   - ./autogen.sh
-  - ./configure --with-libsodium && make
+  - ./configure && make
   - sudo make install
   - sudo ldconfig
   - docker run -dit --name emscripten --user "$(id -u):$(id -g)" -v $(pwd):/src trzeci/emscripten:1.39.11-upstream bash
