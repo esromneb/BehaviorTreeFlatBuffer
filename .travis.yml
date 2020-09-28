@@ -12,9 +12,9 @@ services:
   - zmq
 
 before_install:
-  - git clone https://github.com/zeromq/libzmq.git
   - docker run -dit --name emscripten --user "$(id -u):$(id -g)" -v $(pwd):/src trzeci/emscripten:1.39.11-upstream bash
-  - docker exec -it emscripten bash -c 'cd libzmq && ./autogen.sh && ./configure && make && make install && ldconfig'
+  - git clone https://github.com/zeromq/libzmq.git
+  - cd libzmq && ./autogen.sh && ./configure && make && make install && ldconfig && cd ..
 
 before_script:
   - docker exec -it emscripten make wasm
