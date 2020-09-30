@@ -406,8 +406,8 @@ test("test tree id extraction", async function(done) {
 
   dut.parseXML(testTree5);
 
-  // console.log(dut.children);
-  // console.log(dut.treeNodeIds);
+  console.log(JSON.stringify(dut.children));
+  console.log(JSON.stringify(dut.treeNodeIds));
 
   let got;
   // got = dut.getUIDforPathArray([0,0]);
