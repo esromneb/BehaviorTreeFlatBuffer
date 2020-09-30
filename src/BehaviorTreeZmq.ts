@@ -21,6 +21,9 @@ class BehaviorTreeZmq {
     // const sock = new zmq.Reply
 
 
+  firstMessage: any;
+
+
   async run() {
     this.sock = new zmq.Reply;
 
@@ -35,7 +38,7 @@ class BehaviorTreeZmq {
     for await (const [msg] of sock) {
       console.log("got msg");
       console.log(msg);
-      await sock.send(2 * parseInt(msg, 10))
+      await sock.send(this.firstMessage)
     }
 
     // while (true) {

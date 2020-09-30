@@ -9,14 +9,9 @@ sudo: required
 
 services:
   - docker
-  - zmq
 
 before_install:
   - docker run -dit --name emscripten --user "$(id -u):$(id -g)" -v $(pwd):/src trzeci/emscripten:1.39.11-upstream bash
-  - git clone https://github.com/zeromq/libzmq.git
-  - cd libzmq && ./autogen.sh && ./configure && make -j2 && cd ..
-
-# make install
 
 before_script:
   - docker exec -it emscripten make wasm

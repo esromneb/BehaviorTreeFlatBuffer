@@ -67,13 +67,17 @@ class BehaviorTreeFlatBuffer {
   writeToBuffer(): void {
     // this.writeBufferContainer = o;
 
-    this.internalBuffer = Uint8Array.of();
+    this.resetBuffer();
 
     this.bindBufferWriter();
   }
 
   getInternalBuffer(): Uint8Array {
     return this.internalBuffer;
+  }
+
+  resetBuffer(): void {
+    this.internalBuffer = Uint8Array.of();
   }
 
 

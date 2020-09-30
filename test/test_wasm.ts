@@ -131,7 +131,7 @@ function inject(dut, id, p: string, n: string): void {
 }
 
 
-function injectD(dut, id, p: string, n: string, duraton: number): void {
+function injectD(dut, id, p: string, n: string, duration: number): void {
   const t = {
     idle: 0,
     running: 1,
@@ -140,7 +140,13 @@ function injectD(dut, id, p: string, n: string, duraton: number): void {
   };
 
 
-  dut.logTransitionDuration(id, t[p], t[n], duraton);
+  dut.logTransitionDuration(id, t[p], t[n], duration);
+}
+
+function injectDR(dut, id, p: string, n: string, duration: number): void {
+  injectD(dut, id, p, n, duration);
+  console.log(JSON.stringify(dut.getInternalBuffer()));
+  dut.resetBuffer();
 }
 
 
@@ -414,6 +420,142 @@ test("test tree id extraction", async function(done) {
   expect(dut.getNameForUID(dut.getForPath('0.1.2.0'))).toBe('go1');
   expect(dut.getNameForUID(dut.getForPath('0.1.2.1'))).toBe('go2');
   expect(dut.getNameForUID(dut.getForPath('0.1.2.2'))).toBe('go3');
+  // console.log(got);
+
+
+  done();
+
+});
+
+
+
+
+
+
+// so you can do
+function checkTypedArrayType(someTypedArray) {
+  const typedArrayTypes = [
+    Int8Array,
+    Uint8Array,
+    Uint8ClampedArray,
+    Int16Array,
+    Uint16Array,
+    Int32Array,
+    Uint32Array,
+    Float32Array,
+    Float64Array,
+    BigInt64Array,
+    BigUint64Array
+  ];
+  const checked = typedArrayTypes.filter(ta => someTypedArray.constructor === ta);
+  return checked.length && checked[0].name || null;
+}
+
+
+
+test("test internal buffer", async function(done) {
+    const actionNodes = [
+    'go1',
+    'go2',
+    'go3',
+    'stay1',
+    'stay2',
+  ];
+
+  dut.writeToBuffer();
+
+  dut.registerActionNodes(actionNodes);
+
+  dut.parseXML(testTree5);
+
+  let hb = dut.getInternalBuffer();
+
+  expect(checkTypedArrayType(hb)).toBe('Uint8Array');
+
+  expect(hb.length > 5000).toBe(true);
+
+  dut.resetBuffer();
+
+  expect(checkTypedArrayType(dut.getInternalBuffer())).toBe('Uint8Array');
+
+  expect(dut.getInternalBuffer().length).toBe(0);
+
+  injectD(dut, 1, 'idle', 'running', 0);
+
+  expect(dut.getInternalBuffer().length).toBe(12);
+
+  done();
+
+});
+
+
+
+test.skip("test tree print dump", async function(done) {
+  
+  // const outputPath = './testTree5.fbl';
+
+
+  // try {
+  //   fs.unlinkSync(outputPath);
+  // } catch(e) {}
+
+  const actionNodes = [
+    'go1',
+    'go2',
+    'go3',
+    'stay1',
+    'stay2',
+  ];
+
+  dut.writeToBuffer();
+
+
+
+  // const dut = new BehaviorTreeFlatBuffer();
+  // await dut.start();
+
+  // await dut.setFilePath(outputPath);
+
+  dut.registerActionNodes(actionNodes);
+
+  dut.parseXML(testTree5);
+
+  console.log('header: testTree5');
+
+  console.log(JSON.stringify(dut.getInternalBuffer()));
+
+  dut.resetBuffer();
+
+  injectDR(dut, 1, 'idle', 'running', 0);
+  injectDR(dut, 2, 'idle', 'running', 1000);
+  injectDR(dut, 3, 'idle', 'running', 1100);
+  injectDR(dut, 4, 'idle', 'failure', 1200);
+  injectDR(dut, 4, 'failure', 'idle', 1300);
+  injectDR(dut, 3, 'running', 'failure', 1400);
+  injectDR(dut, 6, 'idle', 'running', 1500);
+  injectDR(dut, 7, 'idle', 'running', 1600);
+  injectDR(dut, 8, 'idle', 'running', 1700);
+  injectDR(dut, 9, 'idle', 'failure', 1800);
+  injectDR(dut, 8, 'running', 'success', 1900);
+  injectDR(dut, 9, 'failure', 'idle', 2000);
+  injectDR(dut, 10, 'idle', 'running', 2100);
+
+  // // console.log(dut.children);
+  // // console.log(dut.treeNodeIds);
+
+  // let got;
+  // // got = dut.getUIDforPathArray([0,0]);
+  // got = dut.getForPathArray([0,1,1]);
+  // // console.log(got);
+  //           // getUIDForPath       
+  // expect(dut.getNameForUID(dut.getForPath('0.1.1'))).toBe('stay2');
+
+
+  // expect(dut.getNameForUID(dut.getForPath('0'))).toBe('Sequence');
+
+  // expect(dut.getNameForUID(dut.getForPath('0.1.2.0'))).toBe('go1');
+  // expect(dut.getNameForUID(dut.getForPath('0.1.2.1'))).toBe('go2');
+  // expect(dut.getNameForUID(dut.getForPath('0.1.2.2'))).toBe('go3');
   // console.log(got);
 
 
