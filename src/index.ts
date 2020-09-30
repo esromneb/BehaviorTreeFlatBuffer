@@ -67,6 +67,8 @@ class BehaviorTreeFlatBuffer {
   writeToBuffer(): void {
     // this.writeBufferContainer = o;
 
+    this.setParseForFile(false);
+
     this.resetBuffer();
 
     this.bindBufferWriter();
@@ -124,6 +126,7 @@ class BehaviorTreeFlatBuffer {
 
   setFilePath(path: string): Promise<void> {
 
+    this.setParseForFile(true);
 
     this.bindFileWriter();
 
@@ -281,14 +284,34 @@ class BehaviorTreeFlatBuffer {
     c.register_action_node     = w('register_action_node',    'void', ['string']);
     c.register_condition_node  = w('register_condition_node', 'void', ['string']);
     c.unregister_builder       = w('unregister_builder',      'void', ['string']);
-    c.parse_xml                = w('parse_xml',               'number', ['string']);
+    c.parse_xml                = w('parse_xml',               'number', ['string', 'number']);
     c.reset_factory            = w('reset_factory',           'void', ['void']);
     c.reset_all                = w('reset_all',               'void', ['void']);
     c.reset_trackers           = w('reset_trackers',          'void', ['void']);
   }
 
+
+
+
+
+  setParseForFile(e: boolean): void {
+    this.parseForFile = e;
+  }
+
+  private parseForFile: boolean = true;
+
+  // parse xml
+  // for file is determined by member variable
+  // this member is set based on which of
+  //   setFilePath
+  //   writeToBuffer
+  // has been called
   parseXML(xml: string): void {
-    const ret = this.c.parse_xml(xml);
+    this.parseXMLInternal(xml, this.parseForFile);
+  }
+
+  parseXMLInternal(xml: string, forFile: boolean): void {
+    const ret = this.c.parse_xml(xml, forFile);
 
     if( ret !== 0 ) {
       throw new Error(`parse_xml() c function returned error: ${ret}`);

@@ -246,8 +246,9 @@ void writeToJs(const unsigned char* const data, const size_t sz) {
 
 
 
-
-void write_tree_header_to_js(const Tree &tree) {
+// forFile true means this is meant to be written to disk
+// false means it's for zmq
+void write_tree_header_to_js(const Tree &tree, const bool forFile) {
     // enableTransitionToIdle(true);
 
     flatbuffers::FlatBufferBuilder builder(1024);
@@ -263,8 +264,12 @@ void write_tree_header_to_js(const Tree &tree) {
     // file_os_.open(filename, std::ofstream::binary | std::ofstream::out);
 
     // // serialize the length of the buffer in the first 4 bytes
-    unsigned char size_buff[4];
-    flatbuffers::WriteScalar(size_buff, sz);
+
+    if( forFile ) {
+        unsigned char size_buff[4];
+        flatbuffers::WriteScalar(size_buff, sz);
+        writeToJs(size_buff, 4);
+    }
 
     // for(int i = 0; i < 4; i++) {
     //     cout << "    " << i << ": " << (int)size_buff[i] << "\n";
@@ -273,7 +278,7 @@ void write_tree_header_to_js(const Tree &tree) {
     // myPrintWrite(size_buff, 4);
     // myPrintWrite(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), builder.GetSize());
 
-    writeToJs(size_buff, 4);
+    // FIXME remove this for zmq option
     writeToJs(reinterpret_cast<const unsigned char*>(builder.GetBufferPointer()), sz);
 
     // file_os_.write(size_buff, 4);
@@ -417,7 +422,7 @@ void reset_all(void) {
 ///
 /// Main entry point
 /// returns non 0 for error, 1 for success
-int parse_xml(const char* xml) {
+int parse_xml(const char* xml, const bool forFile) {
 
     // move early as possible
     parse_time = std::chrono::steady_clock::now();
@@ -441,6 +446,7 @@ int parse_xml(const char* xml) {
     }
 
 
+    // cout << "parse_xml with file: " << (int)forFile << "\n";
 
 
     Tree tree;
@@ -463,7 +469,7 @@ int parse_xml(const char* xml) {
         save_node_ids(tree);
 
         // write to the js callback with byte data for the log header
-        write_tree_header_to_js(tree);
+        write_tree_header_to_js(tree, forFile);
 
     } catch (exception e) {
         cout << "Exception(5): " << e.what() << "\n";

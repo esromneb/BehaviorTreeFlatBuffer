@@ -484,6 +484,25 @@ test("test internal buffer", async function(done) {
 
   expect(dut.getInternalBuffer().length).toBe(12);
 
+
+
+  dut.reset();
+  // this automatically sets parseForFile to false
+  dut.writeToBuffer();
+  // manually set it to true
+  dut.setParseForFile(true);
+  dut.registerActionNodes(actionNodes);
+  dut.parseXML(testTree5);
+
+  let hb2 = dut.getInternalBuffer();
+
+  expect(checkTypedArrayType(hb2)).toBe('Uint8Array');
+
+  // when we turn parse for file on, it should add 4 bytes
+  // we could verify these are correct but this is good for now
+  expect(hb.length + 4).toBe(hb2.length);
+
+
   done();
 
 });
