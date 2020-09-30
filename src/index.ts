@@ -1,5 +1,11 @@
 const fs = require('fs');
 
+
+export interface IFunctionWriterCb {
+  (buf: Uint8Array): void;
+}
+
+
 function _waitForStart(mod): Promise<void> {
   return new Promise((resolve, reject)=>{
     mod.addOnPostRun(resolve);
@@ -112,6 +118,51 @@ class BehaviorTreeFlatBuffer {
   }
 
 
+  userCallback: IFunctionWriterCb;
+
+  writeToCallback(cb: IFunctionWriterCb): void {
+    // this.writeBufferContainer = o;
+    this.userCallback = cb;
+
+    this.setParseForFile(false);
+
+    this.bindCallbackWriter();
+  }
+
+
+
+  // writeToCallback()
+
+  private bindCallbackWriter(): void {
+
+    const wasm = this.wasm;
+    const that = this;
+
+    // example of grabbing byte array directly from wasm memory
+    this.boundFnPtr = wasm.addFunction(function(ptr, sz) {
+
+
+      if(that.logWrites) {
+        console.log(`in js bindCallbackWriter ${ptr} ${sz}`);
+      }
+
+      const myCharArray: Uint8Array = wasm.HEAPU8.subarray(ptr, ptr+sz);
+
+      that.userCallback(myCharArray);
+
+      
+      // that.internalBuffer = _catbuf(Uint8Array, that.internalBuffer, myCharArray);
+      // console.log(that.internalBuffer);
+
+    }, 'vii');
+
+
+    let passFn = wasm.cwrap('pass_write_fn', 'void', ['number']);
+
+    passFn(this.boundFnPtr);
+
+  }
+
 
 
 
@@ -177,7 +228,7 @@ class BehaviorTreeFlatBuffer {
 
 
   boundFnPtr: number;
-
+/*
   bindCallback(): void {
 
     const wasm = this.wasm;
@@ -211,7 +262,7 @@ class BehaviorTreeFlatBuffer {
     passFn(this.boundFnPtr);
 
   }
-
+*/
 
   // this binds the file writer into c
   // every time the c has bytes to write to disk
@@ -292,7 +343,9 @@ class BehaviorTreeFlatBuffer {
 
 
 
-
+  getParseForFile(): boolean {
+    return this.parseForFile;
+  }
 
   setParseForFile(e: boolean): void {
     this.parseForFile = e;
@@ -358,12 +411,12 @@ class BehaviorTreeFlatBuffer {
     this.c.debug_example();
   }
 
-  callCallback(): void {
-    // let fn = this.wasm.cwrap('callBoundJs', 'void', ['void']);
+  // callCallback(): void {
+  //   // let fn = this.wasm.cwrap('callBoundJs', 'void', ['void']);
 
-    // fn();
-    this.c.callBoundJs();
-  }
+  //   // fn();
+  //   this.c.callBoundJs();
+  // }
 
   treeNodeIds: any = {};
   // seems like node ids start at 1 not 0

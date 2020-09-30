@@ -99,25 +99,25 @@ test.skip("test cooked xml", async function(done) {
 
 
 
-test.skip("test call js fn from c", async function(done) {
+// test.skip("test call js fn from c", async function(done) {
 
-  const dut = new BehaviorTreeFlatBuffer();
+//   const dut = new BehaviorTreeFlatBuffer();
 
-  await dut.start();
+//   await dut.start();
 
-  dut.bindCallback();
+//   dut.bindCallback();
 
-  dut.callCallback();
+//   dut.callCallback();
 
-  // expect(dut.testAnything()).toBe(3);
+//   // expect(dut.testAnything()).toBe(3);
 
-  // dut.debugExample();
+//   // dut.debugExample();
   
-  done();
-});
+//   done();
+// });
 
 
-
+// inject a transition, let the c library choose the time
 function inject(dut, id, p: string, n: string): void {
   const t = {
     idle: 0,
@@ -130,8 +130,9 @@ function inject(dut, id, p: string, n: string): void {
   dut.logTransition(id, t[p], t[n]);
 }
 
-
-function injectD(dut, id, p: string, n: string, duration: number): void {
+// inject a transiation, the time (D is for duration, but actually time is abosolute)
+// as an argument
+function injectD(dut, id, p: string, n: string, absoluteTime: number): void {
   const t = {
     idle: 0,
     running: 1,
@@ -140,11 +141,12 @@ function injectD(dut, id, p: string, n: string, duration: number): void {
   };
 
 
-  dut.logTransitionDuration(id, t[p], t[n], duration);
+  dut.logTransitionDuration(id, t[p], t[n], absoluteTime);
 }
 
-function injectDR(dut, id, p: string, n: string, duration: number): void {
-  injectD(dut, id, p, n, duration);
+// same as injectD however we call resetBuffer afterwards
+function injectDR(dut, id, p: string, n: string, absoluteTime: number): void {
+  injectD(dut, id, p, n, absoluteTime);
   console.log(JSON.stringify(dut.getInternalBuffer()));
   dut.resetBuffer();
 }
@@ -502,6 +504,50 @@ test("test internal buffer", async function(done) {
   // we could verify these are correct but this is good for now
   expect(hb.length + 4).toBe(hb2.length);
 
+
+  done();
+
+});
+
+
+
+
+
+
+test("test function writer", async function(done) {
+    const actionNodes = [
+    'go1',
+    'go2',
+    'go3',
+    'stay1',
+    'stay2',
+  ];
+
+  let calls = 0;
+
+  let cb = (x: Uint8Array)=>{
+    if( calls == 0 ) {
+      expect(x.length > 5000).toBe(true);
+    } else {
+      expect(x.length == 12).toBe(true);
+    }
+
+    calls++;
+  }
+
+  dut.writeToCallback(cb);
+
+  expect(dut.getParseForFile()).toBe(false);
+
+  dut.registerActionNodes(actionNodes);
+
+  dut.parseXML(testTree5);
+
+  injectD(dut, 1, 'idle', 'running', 0);
+  injectD(dut, 2, 'idle', 'running', 1000);
+  injectD(dut, 3, 'idle', 'running', 1100);
+
+  expect(calls).toBe(4);
 
   done();
 
